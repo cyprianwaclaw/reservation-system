@@ -1,6 +1,6 @@
 <template>
     <Modal :component="modalName" :modalActive="showModal" @close="handleModal('visit')" />
-    <div class="header flex w-full justify-between place-items-center px-[28px] cursor-default" ref="root">
+    <div class="header flex w-full justify-between place-items-center px-[28px] cursor-default" ref="root" v-if="!isLoading">
         <img class="logo" src="@/assets/images/logo.png" />
         <div class="flex gap-[6px]">
             <div class="flex place-items-center gap-[11px] button-action-users select-none" @click="handleModal('addVisit')">
@@ -15,14 +15,18 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 
 const showModal = ref(false);
-const vistId = ref(16);
+const isLoading = ref(true)
 const modalName = ref('')
 
 const handleModal = (name: string) => {
     modalName.value = name
     showModal.value = !showModal.value;
 };
-
+onMounted(() => {
+    setTimeout(() => {        
+        isLoading.value = false
+    }, 970)
+})
 </script>
 <style scoped>
 .header {
