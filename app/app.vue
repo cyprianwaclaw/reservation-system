@@ -1,5 +1,5 @@
 <template>
-  <div> 
+  <div class="text-black-own"> 
     <Nav/>
     <NuxtPage/>
   </div>

@@ -9,44 +9,31 @@
     </div>
 
     <div class="calendar-grid">
-      <div
-        v-for="(day, index) in monthDaysWithBlanks"
-        :key="index"
-        :class="[
-          'day',
-          day.isBlank ? 'blank' : '',
-          !day.isBlank && isAvailable(day.date) ? 'available' : '',
-          !day.isBlank && selectedDate === day.date ? 'selected' : '',
-        ]"
-        @click="!day.isBlank && isAvailable(day.date) && selectDate(day.date)"
-      >
+      <div v-for="(day, index) in monthDaysWithBlanks" :key="index" :class="[
+        'day',
+        day.isBlank ? 'blank' : '',
+        !day.isBlank && isAvailable(day.date) ? 'available' : '',
+        !day.isBlank && selectedDate === day.date ? 'selected' : '',
+      ]" @click="!day.isBlank && isAvailable(day.date) && selectDate(day.date)">
         {{ day.isBlank ? '' : day.day }}
       </div>
     </div>
 
     <div v-if="selectedDate" class="person-picker">
-      <h3>Wybierz osobę</h3>
+      <h3>Wybierz lekarza</h3>
       <div class="persons-grid">
-        <div
-          v-for="person in persons"
-          :key="person"
-          :class="['person', { selected: selectedPerson === person }]"
-          @click="selectPerson(person)"
-        >
-          {{ person }}
+        <div v-for="person in persons" :key="person.doctor_id"
+          :class="['person', { selected: selectedPerson === person.doctor_id }]" @click="selectPerson(person.doctor_id)">
+          {{ person.name }} {{ person.surname }}
         </div>
       </div>
     </div>
 
     <div v-if="selectedDate && selectedPerson" class="time-picker">
-      <h3>Dostępne godziny dla {{ selectedPerson }} w dniu {{ selectedDate }}</h3>
+      <h3>Dostępne godziny dla lekarza w dniu {{ selectedDate }}</h3>
       <div class="time-grid">
-        <div
-          v-for="time in availableTimesForPerson"
-          :key="time"
-          :class="['time', { selected: selectedTime === time }]"
-          @click="selectTime(time)"
-        >
+        <div v-for="time in availableTimesForPerson" :key="time" :class="['time', { selected: selectedTime === time }]"
+          @click="selectTime(time)">
           {{ time }}
         </div>
         <div v-if="availableTimesForPerson.length === 0" class="no-times">
@@ -55,12 +42,20 @@
       </div>
     </div>
 
-    <div v-if="selectedDate && selectedPerson && selectedTime" class="booking-actions">
-      <button @click="book" class="btn-book">Zarezerwuj</button>
+    <div v-if="selectedDate && selectedPerson && selectedTime" class="booking-form">
+      <h3>Formularz rezerwacji</h3>
+      <form @submit.prevent="book">
+        <input v-model="form.name" placeholder="Imię" required />
+        <input v-model="form.surname" placeholder="Nazwisko" required />
+        <input v-model="form.phone" placeholder="Telefon" required />
+        <input v-model="form.email" type="email" placeholder="Email" required />
+        <button type="submit" class="btn-book">Zarezerwuj</button>
+      </form>
     </div>
 
     <div v-if="confirmed" class="confirmation">
-      Zarezerwowano termin: <strong>{{ confirmed.date }}</strong>, osoba: <strong>{{ confirmed.person }}</strong> o
+      Zarezerwowano termin: <strong>{{ confirmed.date }}</strong>, lekarz: <strong>{{ confirmed.personName }}</strong>
+      o godzinie
       <strong>{{ confirmed.hour }}</strong>
     </div>
   </div>
@@ -68,38 +63,68 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
-import { getFreeSlots, reserveSlot, persons } from '~/composables/useSchedule'
 
+const axiosInstance = useNuxtApp().$axiosInstance as any
+
+interface Doctor {
+  doctor_id: number
+  name: string
+  surname: string
+  free_slots: string[]
+}
+
+interface AvailableDay {
+  date: string
+  doctors: Doctor[]
+}
+
+// --- Funkcja do generowania lokalnej daty YYYY-MM-DD bez przesunięć ---
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear()
+  const month = (date.getMonth() + 1).toString().padStart(2, '0')
+  const day = date.getDate().toString().padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
+// --- Reactive states ---
 const currentYear = ref(new Date().getFullYear())
 const currentMonth = ref(new Date().getMonth())
 
-// Limit na ile miesięcy w przód można iść (np. 2)
 const maxMonthsAhead = 2
 const today = new Date()
 const startYear = today.getFullYear()
 const startMonth = today.getMonth()
 
 const selectedDate = ref<string | null>(null)
-const selectedPerson = ref<string | null>(null)
+const selectedPerson = ref<number | null>(null) // doctor_id
 const selectedTime = ref<string | null>(null)
-const confirmed = ref<{ date: string; person: string; hour: string } | null>(null)
+const confirmed = ref<null | { date: string; personName: string; hour: string }>(null)
 
-const availableTimes = ref<Record<string, Record<string, string[]>>>({})
+const availableDays = ref<AvailableDay[]>([])
 
-// Załaduj dostępne sloty dla aktualnego miesiąca przy starcie i przy zmianie miesiąca
-watch(
-  [currentYear, currentMonth],
-  () => {
-    availableTimes.value = getFreeSlots(currentYear.value, currentMonth.value)
-    // Reset wyborów
-    selectedDate.value = null
-    selectedPerson.value = null
-    selectedTime.value = null
-    confirmed.value = null
-  },
-  { immediate: true }
-)
+// Lista lekarzy dostępnych w aktualnym miesiącu i dniu
+const persons = computed(() => {
+  if (!selectedDate.value) return []
+  const day = availableDays.value.find(d => d.date === selectedDate.value)
+  return day ? day.doctors : []
+})
 
+// --- Pobierz dostępne dni z API ---
+async function loadAvailableDays(year: number, month: number) {
+  try {
+    const res = await axiosInstance.get('/schedule/available-days', {
+      params: {
+        year,
+        month: month + 1, // jeśli API liczy miesiące 1-12
+      },
+    })
+    availableDays.value = res.data
+  } catch (error) {
+    console.error('Błąd ładowania dostępnych dni:', error)
+  }
+}
+
+// --- Generuj kalendarz z pustymi dniami dla wyrównania tygodnia ---
 function getAllDatesWithBlanks(year: number, month: number) {
   const daysArr: { day: number; date: string; isBlank: boolean }[] = []
 
@@ -114,7 +139,7 @@ function getAllDatesWithBlanks(year: number, month: number) {
   const lastDay = new Date(year, month + 1, 0).getDate()
   for (let day = 1; day <= lastDay; day++) {
     const d = new Date(year, month, day)
-    daysArr.push({ day, date: d.toISOString().split('T')[0], isBlank: false })
+    daysArr.push({ day, date: formatLocalDate(d), isBlank: false })
   }
 
   return daysArr
@@ -127,9 +152,10 @@ const monthLabel = computed(() => {
   return date.toLocaleDateString('pl-PL', { year: 'numeric', month: 'long' })
 })
 
-const personsList = persons
-
-const isAvailable = (date: string) => Object.keys(availableTimes.value).includes(date)
+// Sprawdzenie czy dany dzień jest dostępny (czy jest w availableDays)
+function isAvailable(date: string) {
+  return availableDays.value.some(day => day.date === date)
+}
 
 function selectDate(date: string) {
   if (!isAvailable(date)) return
@@ -139,15 +165,18 @@ function selectDate(date: string) {
   confirmed.value = null
 }
 
-function selectPerson(person: string) {
-  selectedPerson.value = person
+function selectPerson(doctor_id: number) {
+  selectedPerson.value = doctor_id
   selectedTime.value = null
   confirmed.value = null
 }
 
 const availableTimesForPerson = computed(() => {
   if (!selectedDate.value || !selectedPerson.value) return []
-  return availableTimes.value[selectedDate.value]?.[selectedPerson.value] || []
+  const day = availableDays.value.find(d => d.date === selectedDate.value)
+  if (!day) return []
+  const doctor = day.doctors.find(d => d.doctor_id === selectedPerson.value)
+  return doctor ? doctor.free_slots : []
 })
 
 function selectTime(time: string) {
@@ -155,24 +184,49 @@ function selectTime(time: string) {
   confirmed.value = null
 }
 
-function book() {
+const form = ref({
+  name: '',
+  surname: '',
+  phone: '',
+  email: '',
+})
+
+async function book() {
   if (!selectedDate.value || !selectedPerson.value || !selectedTime.value) return
+  if (!form.value.name || !form.value.surname || !form.value.phone || !form.value.email) return alert('Wypełnij wszystkie pola formularza')
 
-  reserveSlot(selectedDate.value, selectedPerson.value, selectedTime.value)
-  confirmed.value = {
-    date: selectedDate.value,
-    person: selectedPerson.value,
-    hour: selectedTime.value,
+  try {
+    await axiosInstance.post('/schedule/reserve', {
+      doctor_id: selectedPerson.value,
+      name: form.value.name,
+      surname: form.value.surname,
+      phone: form.value.phone,
+      email: form.value.email,
+      date: selectedDate.value,
+      hour: selectedTime.value,
+    })
+
+    const doctor = persons.value.find(d => d.doctor_id === selectedPerson.value)
+    confirmed.value = {
+      date: selectedDate.value,
+      personName: doctor ? `${doctor.name} ${doctor.surname}` : '',
+      hour: selectedTime.value,
+    }
+
+    // Odśwież dane z API po rezerwacji
+    await loadAvailableDays(currentYear.value, currentMonth.value)
+
+    // Reset wyborów i formularza
+    selectedDate.value = null
+    selectedPerson.value = null
+    selectedTime.value = null
+    form.value = { name: '', surname: '', phone: '', email: '' }
+  } catch (error) {
+    alert('Błąd rezerwacji: ' + error)
   }
-  // Po rezerwacji odśwież dostępne sloty (ponownie załaduj miesiąc)
-  availableTimes.value = getFreeSlots(currentYear.value, currentMonth.value)
-
-  selectedDate.value = null
-  selectedPerson.value = null
-  selectedTime.value = null
 }
 
-// Kontrola, czy można przejść do poprzedniego miesiąca (nie wyjść przed dzisiejszy)
+// Kontrola nawigacji miesięcy
 const canGoPrev = computed(() => {
   return (
     currentYear.value > startYear ||
@@ -180,9 +234,8 @@ const canGoPrev = computed(() => {
   )
 })
 
-// Kontrola, czy można przejść do następnego miesiąca (maksymalnie 2 miesiące do przodu)
 const canGoNext = computed(() => {
-  const maxMonth = (startYear * 12 + startMonth) + maxMonthsAhead
+  const maxMonth = startYear * 12 + startMonth + maxMonthsAhead
   const currentMonthNumber = currentYear.value * 12 + currentMonth.value
   return currentMonthNumber < maxMonth
 })
@@ -206,9 +259,24 @@ function nextMonth() {
     currentMonth.value += 1
   }
 }
+
+// Watch na zmianę miesiąca, aby załadować dostępne dni
+watch(
+  [currentYear, currentMonth],
+  () => {
+    loadAvailableDays(currentYear.value, currentMonth.value)
+    selectedDate.value = null
+    selectedPerson.value = null
+    selectedTime.value = null
+    confirmed.value = null
+  },
+  { immediate: true }
+)
 </script>
 
 <style scoped>
+/* style według Twoich poprzednich założeń */
+
 .calendar {
   max-width: 350px;
   margin: auto;
@@ -292,6 +360,7 @@ function nextMonth() {
   display: flex;
   gap: 10px;
   margin-top: 5px;
+  flex-wrap: wrap;
 }
 
 .person {
@@ -300,6 +369,7 @@ function nextMonth() {
   border-radius: 4px;
   cursor: pointer;
   user-select: none;
+  white-space: nowrap;
 }
 
 .person.selected {
@@ -324,6 +394,7 @@ function nextMonth() {
   border-radius: 4px;
   cursor: pointer;
   user-select: none;
+  white-space: nowrap;
 }
 
 .time:hover {
@@ -335,9 +406,18 @@ function nextMonth() {
   color: white;
 }
 
-.booking-actions {
+.user-data {
   margin-top: 15px;
-  text-align: center;
+  display: flex;
+  gap: 8px;
+  flex-direction: column;
+}
+
+.user-data input {
+  padding: 6px 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1em;
 }
 
 .btn-book {
@@ -348,10 +428,12 @@ function nextMonth() {
   border-radius: 4px;
   cursor: pointer;
   font-weight: bold;
+  max-width: 150px;
 }
 
-.btn-book:hover {
-  background-color: #2691b8;
+.btn-book:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .confirmation {
