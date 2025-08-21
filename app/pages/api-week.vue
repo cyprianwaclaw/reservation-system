@@ -351,7 +351,7 @@ onMounted(async () => {
     interval = setInterval(updateCurrentTime, 100);
     setTimeout(() => {
         isLoading.value = false;
-    }, 900)
+    }, 800)
 });
 
 onBeforeUnmount(() => {
