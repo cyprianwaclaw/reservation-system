@@ -1,9 +1,9 @@
 <template>
-    <Modal :component="modalName" :modalActive="showModal" @close="handleModal('visit')" />
+    <Modal :component="modalName" :modalActive="showModal" @close="handleModal('allPatient')" />
     <div class="header flex w-full justify-between place-items-center px-[28px] cursor-default" ref="root" v-if="!isLoading">
         <img class="logo" src="@/assets/images/logo.png" />
         <div class="flex gap-[6px]">
-            <div class="flex place-items-center gap-[11px] button-action-users select-none" @click="handleModal('addVisit')">
+            <div class="flex place-items-center gap-[11px] button-action-users select-none" @click="handleModal('allPatient')">
                 <Icon name="ph:users-bold" size="28" class="primary-color" />
                 <p class="font-semibold text-[17px] mt-[1px] text-black-own ">Pacjenci</p>
             </div>

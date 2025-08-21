@@ -11,7 +11,7 @@
                         <Icon name="carbon:close" size="40" class="close-icon -mt-[14px] -mr-[10px]"
                             @click="$emit('close')" />
                     </div>
-                    <div class="flex w-full h-full -mt-[25px] p-5">
+                    <div class="flex w-full h-full -mt-[23px] p-5">
                         <ModalTemplateVisit :vistId="data" v-if="component === 'visit'" />
                         <ModalTemplateAddPatient :vistId="data" v-if="component === 'addPatient'" />
                         <ModalTemplateAllPatient :vistId="data" v-if="component === 'allPatient'" />

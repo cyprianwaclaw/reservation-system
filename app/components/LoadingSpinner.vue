@@ -65,4 +65,5 @@ const props = defineProps<{
         opacity: 1;
     }
 
-}</style>
+}
+</style>
