@@ -2,7 +2,10 @@
     <Transition>
         <div class="modal-conatiner">
             <div class="blur-background-update" v-if="props.modalActive" @click="$emit('close')" />
-            <Transition @before-enter="onBefore">
+            <Transition
+      @before-enter="onBefore"
+      @leave="onLeave"
+    >
                 <div class="modal-view p-[20px]" v-if="props.modalActive">
                     <div class="close-icon-div">
                         <Icon name="carbon:close" size="40" class="close-icon -mt-[14px] -mr-[10px]"
@@ -22,8 +25,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
-import { useNuxtApp } from 'nuxt/app';
 import gsap from 'gsap'
 
 const emit = defineEmits(['close'])
@@ -40,14 +41,26 @@ const props = defineProps({
         type: Boolean,
         required: true,
     },
-});
+})
 
 const onBefore = (el: any) => {
     gsap.to(el, {
         y: -20,
-        duration: 0.2,
+        duration: 0.3,
     })
 }
+
+const onLeave = (el: any, done: () => void) => {
+    gsap.to(el, {
+        opacity: 0,
+        y: 0,
+        scale: 1,
+        duration: 0,
+        ease: 'power2.in',
+        onComplete: done,
+    })
+}
+
 </script>
 
 <style scoped>
@@ -91,7 +104,7 @@ const onBefore = (el: any) => {
 /* tło do modala */
 .v-enter-active,
 .v-leave-active {
-    transition: opacity 0s ease;
+    transition: opacity 0.4s ease;
 }
 
 .v-enter-from,
