@@ -114,7 +114,7 @@ const singleUser = ref(null) as any;
 const loading = ref(false);
 const searchTerm = ref('');
 
-const limit = 100;
+const limit = 60;
 let offset = 0;
 let allLoaded = false;
 let debounceTimeout: any = null;

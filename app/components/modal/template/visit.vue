@@ -172,13 +172,6 @@ const confirmChangeDate = async () => {
     emit('close', { reload: true })
 }
 
-const onBefore = (el: any) => {
-    gsap.to(el, {
-        y: -20,
-        duration: 0.2,
-    })
-}
-
 const doctorOptions = computed(() =>
     doctorsForSelectedDate.value.map((doc: any) => ({
         value: doc.doctor_id,
