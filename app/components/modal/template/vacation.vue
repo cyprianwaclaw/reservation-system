@@ -29,7 +29,7 @@
                         <InputSelect v-model="dateEnd" :options="dateEndOptions" placeholder="Wybierz datę zakończenia" />
                     </div>
                 </Transition>
-                <div class="absolute bottom-[30px] right-[40px]">
+                <div class="absolute bottom-[0px] right-[0px]">
                     <Button class="primary-button" @click="addVacation()">Dodaj</Button>
                 </div>
             </div>
