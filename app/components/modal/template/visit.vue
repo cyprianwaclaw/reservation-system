@@ -11,7 +11,7 @@
                     <span class="dot"/>
                     <p class="text-[#bababa] text-[15px]">{{ visitData.user.phone }}</p>
                 </div>
-                <p class="text-[#bababa] text-[15px] -mt-[3px]">34 lata</p>
+                <p class="text-[#bababa] text-[15px] -mt-[3px]">{{ visitData.user }}</p>
             </div>
             <p class="text-[15px] font-semibold  primary-color  mt-[24px]">Usługa: <span
                     class="font-medium text-black-own">Wizyta u

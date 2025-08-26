@@ -151,7 +151,7 @@ function clearInputs() {
     newDoctor.value = ''
     newDate.value = ''
     allDay.value = false,
-        timeStart.value = ''
+    timeStart.value = ''
     timeEnd.value = ''
 }
 
@@ -204,61 +204,5 @@ const addVacation = async () => {
 .fade-slide-leave-from {
     opacity: 1;
     transform: translateY(0);
-}
-
-.checkbox-wrapper {
-    display: inline-flex;
-    align-items: center;
-    cursor: pointer;
-    font-size: 16px;
-    gap: 8px;
-    user-select: none;
-    margin-top: 16px
-}
-
-.checkbox-wrapper-none {
-    display: inline-flex;
-    align-items: center;
-    cursor: default;
-    font-size: 16px;
-    gap: 8px;
-    user-select: none;
-    margin-top: 16px
-}
-
-/* ukrywamy natywne pole */
-.checkbox-hidden {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-}
-
-/* kwadracik */
-.checkbox-custom {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #d1d1d1;
-    border-radius: 6px;
-    display: inline-block;
-    position: relative;
-    transition: all 0.2s ease;
-}
-
-/* zaznaczenie (ptaszek) */
-.checkbox-hidden:checked+.checkbox-custom {
-    background-color: #31a9ce;
-    border-color: #31a9ce;
-}
-
-.checkbox-hidden:checked+.checkbox-custom::after {
-    content: "";
-    position: absolute;
-    left: 5px;
-    top: 2px;
-    width: 5px;
-    height: 10px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
 }
 </style>

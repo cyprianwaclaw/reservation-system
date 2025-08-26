@@ -1,7 +1,7 @@
 <template>
     <Modal :component="modalName" :modalActive="showModal" @close="handleModal('allPatient')" />
     <div class="header flex w-full justify-between place-items-center px-[28px] cursor-default" ref="root"
-        v-if="!isLoading">
+        :class="router.currentRoute.value?.name === 'index' ? 'sticky top-0 z-50 bg-white' : ''" v-if="!isLoading">
         <img class="logo" src="@/assets/images/logo.png" />
         <div class="flex gap-[6px]" v-if="router.currentRoute.value?.name !== 'index'">
             <div class="flex place-items-center gap-[11px] button-action-users select-none"
@@ -10,6 +10,10 @@
                 <p class="font-semibold text-[17px] mt-[1px] text-black-own ">Pacjenci</p>
             </div>
             <Add />
+        </div>
+        <div v-else class="text-[16px] font-medium flex gap-[21px]">
+            <NuxtLink to="/" class="hover:text-gray-500">Fizjoterapia Kaczmarek</NuxtLink>
+            <NuxtLink to="/" class="hover:text-gray-500">Centrum Zdrowia Biegacza</NuxtLink>
         </div>
     </div>
 </template>
@@ -24,8 +28,8 @@ const handleModal = (name: string) => {
     showModal.value = !showModal.value;
 };
 onMounted(() => {
-    if (router.currentRoute.value?.name=='index') {
-         isLoading.value = false
+    if (router.currentRoute.value?.name == 'index') {
+        isLoading.value = false
     } else {
         setTimeout(() => {
             isLoading.value = false
@@ -41,7 +45,7 @@ onMounted(() => {
 }
 
 .logo {
-    width: 123px;
+    width: 130px;
 }
 
 .button-action-users {

@@ -1,89 +1,153 @@
 <template>
     <div class="calendar w-[450px]">
-        <h class="text-[40px] font-bold">Rezerwuj termin</h>
-        <!-- <button type="submit" class="reserve-button">Zarezerwuj</button> -->
-
-        <!-- Kalendarz -->
-        <div class="w-[370px] border-calendar mt-[44px] p-[25px] ">
-            <div class="calendar-header">
-                <Icon  v-if="canGoPrev" @click="prevMonth" name="ph:caret-left-bold" size="27" class="close-icon w-[40px] pl-[30px]"/>
-                <!-- <button v-if="canGoPrev" class="nav-btn" @click="prevMonth">‹</button> -->
-                <div v-else class="w-[40px]" />
-                <div class="month-label text-center w-full">{{ monthLabel }}</div>
-                    <Icon  v-if="canGoNext" @click="nextMonth" name="ph:caret-right-bold" size="27" class="close-icon w-[40px] pr-[30px]"/>
-                <!-- <button v-if="canGoNext" class="nav-btn" @click="nextMonth">›</button> -->
-                <div v-else class="w-[40px]" />
-            </div>
-            
-            <div class="weekday-row  mt-[21px]">
-                <div v-for="d in weekdays" :key="d" class="weekday-cell">{{ d }}</div>
-            </div>
-            
-            <div class="days-grid">
-                <button v-for="day in monthDaysWithBlanks" :key="day.date || day.day + '-' + day.isBlank" class="day-cell"
-                :class="{
-                    'other-month': day.isBlank,
-                    today: day.date === todayDateStr,
-                    selected: selectedDate === day.date,
-                    disabled: !isAvailable(day.date) || day.isBlank
-                }" @click="!day.isBlank && isAvailable(day.date) && selectDate(day.date)"
-                :aria-pressed="selectedDate === day.date ? 'true' : 'false'">
-                {{ day.isBlank ? '' : day.day }}
-            </button>
-        </div>
-    </div>
-
-        <!-- Wybór lekarza -->
-        <div v-if="selectedDate" class="person-picker mt-[50px]">
-            <h3>Wybierz lekarza</h3>
-            <div class="persons-grid">
-                <div v-for="person in persons" :key="person.doctor_id"
-                    :class="['person', { selected: selectedPerson === person.doctor_id }]"
-                    @click="selectPerson(person.doctor_id)">
-                    {{ person.name }} {{ person.surname }}
+        <Transition name="fade-slide">
+            <div v-if="isConfirmed" class="confirmation mt-[60px]">
+                <SuccessCheck />
+                <p class="text-[28px] font-semibold">
+                    Zarezerwowano wizytę!
+                </p>
+                <div class="flex flex-col">
+                    <p class="mt-[8px] text-[17px]">
+                        Dzień dobry <span class="primary-color font-semibold underline">{{ confirmed?.name }}</span>, <br>
+                        dziękujemy za umówienie wizyty w naszym gabinecie.
+                        Dzień przed wizytą otrzymasz e-maila oraz SMS z przypomnieniem
+                    </p>
+                    <div class="bg-[#31a9ce29] mt-[32px] mb-[6px] p-[26px] rounded-xl">
+                        <p class="text-[21px] font-semibold mb-[8px]">Szczegóły wizyty</p>
+                        <div class="flex flex-col gap-[2px]">
+                            <p class="text-[17px]">
+                                Termin: <span class="primary-color font-semibold underline text-[19px]">{{ confirmed?.date
+                                }}</span>
+                            </p>
+                            <p class="text-[17px]">
+                                Godzina: <span class="primary-color font-semibold underline text-[19px]">{{ confirmed?.hour
+                                }}</span>
+                            </p>
+                            <p class="text-[17px]">
+                                Lekarz: <span class="primary-color font-semibold underline text-[19px]">{{ confirmed?.doctor
+                                }}</span>
+                            </p>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </Transition>
+        <Transition name="fade-slide">
+            <div v-if="isNonConfirmed">
+                <h2 class="text-[40px] font-bold mb-[4px]">Umów wizytę</h2>
+                <p class="text-[18px] text-gray-600 mb-[24px]">
+                    Wybierz dogodny dla siebie termin z kalendarza poniżej <br>i zarezerwuj wizytę online.
+                    To szybkie i wygodne, wystarczy kilka kliknięć
+                </p>
 
-        <!-- Wybór godziny -->
-        <div v-if="selectedDate && selectedPerson" class="time-picker">
-            <h3>Dostępne godziny</h3>
-            <div class="time-grid">
-                <div v-for="time in availableTimesForPerson" :key="time"
-                    :class="['time', { selected: selectedTime === time }]" @click="selectTime(time)">
-                    {{ time }}
+                <!-- Kalendarz -->
+                <div class="w-[370px] border-calendar mt-[44px] p-[25px]">
+                    <div class="calendar-header">
+                        <Icon v-if="canGoPrev" @click="prevMonth" name="ph:caret-left-bold" size="27"
+                            class="close-icon w-[40px] pl-[30px]" />
+                        <!-- <button v-if="canGoPrev" class="nav-btn" @click="prevMonth">‹</button> -->
+                        <div v-else class="w-[40px]" />
+                        <div class="month-label text-center w-full">{{ monthLabel }}</div>
+                        <Icon v-if="canGoNext" @click="nextMonth" name="ph:caret-right-bold" size="27"
+                            class="close-icon w-[40px] pr-[30px]" />
+                        <!-- <button v-if="canGoNext" class="nav-btn" @click="nextMonth">›</button> -->
+                        <div v-else class="w-[40px]" />
+                    </div>
+
+                    <div class="weekday-row  mt-[21px]">
+                        <div v-for="d in weekdays" :key="d" class="weekday-cell">{{ d }}</div>
+                    </div>
+
+                    <div class="days-grid">
+                        <button v-for="day in monthDaysWithBlanks" :key="day.date || day.day + '-' + day.isBlank"
+                            class="day-cell" :class="{
+                                'other-month': day.isBlank,
+                                today: day.date === todayDateStr,
+                                selected: selectedDate === day.date,
+                                disabled: !isAvailable(day.date) || day.isBlank
+                            }" @click="!day.isBlank && isAvailable(day.date) && selectDate(day.date)"
+                            :aria-pressed="selectedDate === day.date ? 'true' : 'false'">
+                            {{ day.isBlank ? '' : day.day }}
+                        </button>
+                    </div>
                 </div>
-                <div v-if="availableTimesForPerson.length === 0" class="no-times">
-                    Brak dostępnych godzin
+                <div v-if="selectedDate || selectedPerson || selectedTime" class="pb-[160px]">
+                    <!-- Wybór lekarza -->
+                    <div v-if="selectedDate" class="person-picker mt-[50px]">
+                        <h3>Wybierz lekarza</h3>
+                        <div class="persons-grid">
+                            <div v-for="person in persons" :key="person.doctor_id"
+                                :class="['person', { selected: selectedPerson === person.doctor_id }]"
+                                @click="selectPerson(person.doctor_id)">
+                                {{ person.name }} {{ person.surname }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Wybór godziny -->
+                    <div v-if="selectedDate && selectedPerson" class="time-picker">
+                        <h3>Dostępne godziny</h3>
+                        <div class="time-grid">
+                            <div v-for="time in availableTimesForPerson" :key="time"
+                                :class="['time', { selected: selectedTime === time }]" @click="selectTime(time)">
+                                {{ time }}
+                            </div>
+                            <div v-if="availableTimesForPerson.length === 0" class="no-times">
+                                Brak dostępnych godzin
+                            </div>
+                        </div>
+                    </div>
+                    <div v-if="selectedDate && selectedPerson && selectedTime" class="booking-form">
+                        <h3>Usługa</h3>
+                        <InputSelect v-model="visitType" :options="visitTypeOptions"
+                            placeholder="Wybierz usługę, jaka Cię interesuje" />
+                    </div>
+
+                    <!-- Formularz rezerwacji -->
+                    <div v-if="selectedDate && selectedPerson && selectedTime" class="booking-form">
+                        <h3>Twoje dane</h3>
+                        <form @submit.prevent="book">
+                            <div class="w-full flex flex-col gap-[10px]">
+                                <div class="w-full flex flex-row gap-[10px]">
+                                    <InputBase v-model="form.name" name="name" placeholder="Imię" />
+                                    <InputBase v-model="form.surname" name="surname" placeholder="Nazwisko" />
+                                </div>
+                                <div class="w-full flex flex-row gap-[10px]">
+                                    <InputBase v-model="form.email" name="email" placeholder="E-mail" />
+                                    <InputBase v-model="form.phone" name="phone" placeholder="Telefon" />
+                                </div>
+                                <div class="w-full flex flex-row gap-[14px] place-items-center my-[12px]">
+                                    <p>Ile masz lat?</p>
+                                    <div class="w-[100px]">
+                                        <InputBase v-model="form.wiek" name="wiek" placeholder="Wiek" />
+                                    </div>
+                                </div>
+                                <textarea v-model="form.description" placeholder="Napisz coś o sobie..."
+                                    class="add-description min-h-[170px]"></textarea>
+
+                            </div>
+                            <div class="mt-[21px]">
+                                <label class="checkbox-wrapper">
+                                    <input type="checkbox" v-model="isChecked" class="checkbox-hidden" />
+                                    <span class="checkbox-custom"></span>
+                                    <p class="text-[#8a8a8a] mt-[2px]">akceptuje regulamin i politykę prywatności</p>
+                                </label>
+                                <button type="submit" class="reserve-button mt-[16px]">Zarezerwuj wizytę</button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-
-        <!-- Formularz rezerwacji -->
-        <div v-if="selectedDate && selectedPerson && selectedTime" class="booking-form">
-            <h3>Twoje dane</h3>
-            <form @submit.prevent="book">
-                <div class="w-full flex flex-col gap-[10px]">
-                    <InputBase v-model="form.name" placeholder="Imię" />
-                    <InputBase v-model="form.surname" placeholder="Nazwisko" />
-                    <InputBase v-model="form.email" placeholder="E-mail" />
-                    <InputBase v-model="form.phone" placeholder="Telefon" />
-                </div>
-                <button type="submit" class="reserve-button mt-[24px]">Zarezerwuj wizytę</button>
-            </form>
-        </div>
-
-        <!-- Potwierdzenie -->
-        <div v-if="confirmed" class="confirmation">
-            Zarezerwowano termin: <strong>{{ confirmed.date }}</strong>, lekarz: <strong>{{ confirmed.personName }}</strong>
-            o godzinie
-            <strong>{{ confirmed.hour }}</strong>
-        </div>
+        </Transition>
     </div>
 </template>
 
 <script setup lang="ts">
 const axiosInstance = useNuxtApp().$axiosInstance as any
+const { setErrors } = useErrors()
+
+
+const test = ref(false)
 
 interface Doctor {
     doctor_id: number
@@ -118,10 +182,24 @@ const maxMonthsAhead = 1
 const selectedDate = ref<string | null>(null)
 const selectedPerson = ref<number | null>(null)
 const selectedTime = ref<string | null>(null)
-const confirmed = ref<null | { date: string; personName: string; hour: string }>(null)
+const confirmed = ref<null | { date: string | any; doctor: string | any; hour: string | any, name: string | any }>(null)
 const availableDays = ref<AvailableDay[]>([])
 
-const form = ref({ name: '', surname: '', phone: '', email: '' })
+const form = ref({ name: '', surname: '', phone: '', email: '', wiek: '', description: '' })
+const isChecked = ref(false)
+const isNonConfirmed = ref(true)
+const isConfirmed = ref(false)
+const visitType = ref()
+
+const visitTypeOptions = ref([
+    { value: 'Zabiegi', label: 'Zabiegi' },
+    { value: 'Fizjoterapia', label: 'Fizjoterapia' },
+    { value: 'Rehabilitacja', label: 'Rehabilitacja' },
+    { value: 'Masaż', label: 'Masaż' },
+    { value: 'Kinezyterapia', label: 'Kinezyterapia' },
+    { value: 'Elektroterapia', label: 'Elektroterapia' },
+    { value: 'Terapia manualna', label: 'Terapia manualna' }
+])
 
 const weekdays = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd']
 
@@ -229,7 +307,7 @@ function selectTime(time: string) {
 // Rezerwacja
 async function book() {
     if (!selectedDate.value || !selectedPerson.value || !selectedTime.value) return
-    if (!form.value.name || !form.value.surname || !form.value.phone || !form.value.email) return alert('Wypełnij wszystkie pola formularza')
+    if (!form.value.name || !form.value.surname || !form.value.phone || !form.value.email || !isChecked.value) return
 
     try {
         await axiosInstance.post('/schedule/reserve', {
@@ -238,27 +316,35 @@ async function book() {
             surname: form.value.surname,
             phone: form.value.phone,
             email: form.value.email,
+            wiek: form.value.wiek,
             date: selectedDate.value,
-            hour: selectedTime.value,
+            start_time: selectedTime.value,
+            duration: 45,
         })
 
-        const doctor = persons.value.find(d => d.doctor_id === selectedPerson.value)
-        confirmed.value = {
-            date: selectedDate.value,
-            personName: doctor ? `${doctor.name} ${doctor.surname}` : '',
-            hour: selectedTime.value,
-        }
 
-        // Odśwież dane
         await loadAvailableDays()
 
-        // Reset formularza
+        const doctor = persons.value.find(d => d.doctor_id === selectedPerson.value)
+
+        confirmed.value = {
+            date: selectedDate.value,
+            doctor: doctor ? `${doctor.name} ${doctor.surname}` : '',
+            hour: selectedTime.value,
+            name: form.value.name
+        }
+
         selectedDate.value = null
         selectedPerson.value = null
         selectedTime.value = null
-        form.value = { name: '', surname: '', phone: '', email: '' }
-    } catch (error) {
-        alert('Błąd rezerwacji: ' + error)
+        isChecked.value = false
+
+        form.value = { name: '', surname: '', phone: '', email: '', wiek: '', description: '' }
+
+    } catch (err: any) {
+        if (err.response?.data?.errors) {
+            setErrors(err.response.data.errors);
+        }
     }
 }
 
@@ -299,6 +385,22 @@ watch([currentYear, currentMonth], () => {
     selectedTime.value = null
     confirmed.value = null
 }, { immediate: true })
+
+watch(confirmed, async (val) => {
+    if (val) {
+        isNonConfirmed.value = false
+        setTimeout(() => {
+            isConfirmed.value = true
+        }, 310)
+    }
+    else {
+        isConfirmed.value = false
+        setTimeout(() => {
+            isNonConfirmed.value = true
+        }, 310)
+    }
+})
+
 </script>
 
 <style scoped>
@@ -450,12 +552,33 @@ watch([currentYear, currentMonth], () => {
 h3 {
     font-size: 17px;
     font-weight: 600;
-    margin-top: 40px;
+    margin-top: 45px;
     margin-bottom: 13px;
 }
 
-.border-calendar{
+.border-calendar {
     border: 2px solid #31a9ce;
     border-radius: 12px;
+}
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+    transition: all 0.4s ease;
+}
+
+.fade-slide-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.fade-slide-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.fade-slide-enter-to,
+.fade-slide-leave-from {
+    opacity: 1;
+    transform: translateY(0);
 }
 </style>
