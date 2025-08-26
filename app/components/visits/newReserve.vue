@@ -1,25 +1,40 @@
 <template>
-    <div class="calendar">
-        <h2>Wybierz termin wizyty</h2>
+    <div class="calendar w-[450px]">
+        <h class="text-[40px] font-bold">Rezerwuj termin</h>
+        <!-- <button type="submit" class="reserve-button">Zarezerwuj</button> -->
 
-        <div class="month-navigation">
-            <button @click="prevMonth" :disabled="!canGoPrev">Poprzedni miesiąc</button>
-            <span class="month-label">{{ monthLabel }}</span>
-            <button @click="nextMonth" :disabled="!canGoNext">Następny miesiąc</button>
-        </div>
-
-        <div class="calendar-grid">
-            <div v-for="(day, index) in monthDaysWithBlanks" :key="index" :class="[
-                'day',
-                day.isBlank ? 'blank' : '',
-                !day.isBlank && isAvailable(day.date) ? 'available' : '',
-                !day.isBlank && selectedDate === day.date ? 'selected' : '',
-            ]" @click="!day.isBlank && isAvailable(day.date) && selectDate(day.date)">
-                {{ day.isBlank ? '' : day.day }}
+        <!-- Kalendarz -->
+        <div class="w-[370px] border-calendar mt-[44px] p-[25px] ">
+            <div class="calendar-header">
+                <Icon  v-if="canGoPrev" @click="prevMonth" name="ph:caret-left-bold" size="27" class="close-icon w-[40px] pl-[30px]"/>
+                <!-- <button v-if="canGoPrev" class="nav-btn" @click="prevMonth">‹</button> -->
+                <div v-else class="w-[40px]" />
+                <div class="month-label text-center w-full">{{ monthLabel }}</div>
+                    <Icon  v-if="canGoNext" @click="nextMonth" name="ph:caret-right-bold" size="27" class="close-icon w-[40px] pr-[30px]"/>
+                <!-- <button v-if="canGoNext" class="nav-btn" @click="nextMonth">›</button> -->
+                <div v-else class="w-[40px]" />
             </div>
+            
+            <div class="weekday-row  mt-[21px]">
+                <div v-for="d in weekdays" :key="d" class="weekday-cell">{{ d }}</div>
+            </div>
+            
+            <div class="days-grid">
+                <button v-for="day in monthDaysWithBlanks" :key="day.date || day.day + '-' + day.isBlank" class="day-cell"
+                :class="{
+                    'other-month': day.isBlank,
+                    today: day.date === todayDateStr,
+                    selected: selectedDate === day.date,
+                    disabled: !isAvailable(day.date) || day.isBlank
+                }" @click="!day.isBlank && isAvailable(day.date) && selectDate(day.date)"
+                :aria-pressed="selectedDate === day.date ? 'true' : 'false'">
+                {{ day.isBlank ? '' : day.day }}
+            </button>
         </div>
+    </div>
 
-        <div v-if="selectedDate" class="person-picker">
+        <!-- Wybór lekarza -->
+        <div v-if="selectedDate" class="person-picker mt-[50px]">
             <h3>Wybierz lekarza</h3>
             <div class="persons-grid">
                 <div v-for="person in persons" :key="person.doctor_id"
@@ -30,8 +45,9 @@
             </div>
         </div>
 
+        <!-- Wybór godziny -->
         <div v-if="selectedDate && selectedPerson" class="time-picker">
-            <h3>Dostępne godziny dla lekarza w dniu {{ selectedDate }}</h3>
+            <h3>Dostępne godziny</h3>
             <div class="time-grid">
                 <div v-for="time in availableTimesForPerson" :key="time"
                     :class="['time', { selected: selectedTime === time }]" @click="selectTime(time)">
@@ -43,17 +59,21 @@
             </div>
         </div>
 
+        <!-- Formularz rezerwacji -->
         <div v-if="selectedDate && selectedPerson && selectedTime" class="booking-form">
-            <h3>Formularz rezerwacji</h3>
+            <h3>Twoje dane</h3>
             <form @submit.prevent="book">
-                <input v-model="form.name" placeholder="Imię" required />
-                <input v-model="form.surname" placeholder="Nazwisko" required />
-                <input v-model="form.phone" placeholder="Telefon" required />
-                <input v-model="form.email" type="email" placeholder="Email" required />
-                <button type="submit" class="btn-book">Zarezerwuj</button>
+                <div class="w-full flex flex-col gap-[10px]">
+                    <InputBase v-model="form.name" placeholder="Imię" />
+                    <InputBase v-model="form.surname" placeholder="Nazwisko" />
+                    <InputBase v-model="form.email" placeholder="E-mail" />
+                    <InputBase v-model="form.phone" placeholder="Telefon" />
+                </div>
+                <button type="submit" class="reserve-button mt-[24px]">Zarezerwuj wizytę</button>
             </form>
         </div>
 
+        <!-- Potwierdzenie -->
         <div v-if="confirmed" class="confirmation">
             Zarezerwowano termin: <strong>{{ confirmed.date }}</strong>, lekarz: <strong>{{ confirmed.personName }}</strong>
             o godzinie
@@ -77,7 +97,7 @@ interface AvailableDay {
     doctors: Doctor[]
 }
 
-// --- Funkcja do generowania lokalnej daty YYYY-MM-DD bez przesunięć ---
+// --- Formatowanie daty YYYY-MM-DD ---
 function formatLocalDate(date: Date): string {
     const year = date.getFullYear()
     const month = (date.getMonth() + 1).toString().padStart(2, '0')
@@ -88,45 +108,66 @@ function formatLocalDate(date: Date): string {
 // --- Reactive states ---
 const currentYear = ref(new Date().getFullYear())
 const currentMonth = ref(new Date().getMonth())
-
-const maxMonthsAhead = 2
 const today = new Date()
+const todayDateStr = formatLocalDate(today)
 const startYear = today.getFullYear()
 const startMonth = today.getMonth()
 
+const maxMonthsAhead = 1
+
 const selectedDate = ref<string | null>(null)
-const selectedPerson = ref<number | null>(null) // doctor_id
+const selectedPerson = ref<number | null>(null)
 const selectedTime = ref<string | null>(null)
 const confirmed = ref<null | { date: string; personName: string; hour: string }>(null)
-
 const availableDays = ref<AvailableDay[]>([])
 
-// Lista lekarzy dostępnych w aktualnym miesiącu i dniu
+const form = ref({ name: '', surname: '', phone: '', email: '' })
+
+const weekdays = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd']
+
+// Lista lekarzy w wybranym dniu
 const persons = computed(() => {
     if (!selectedDate.value) return []
     const day = availableDays.value.find(d => d.date === selectedDate.value)
     return day ? day.doctors : []
 })
 
-// --- Pobierz dostępne dni z API ---
-async function loadAvailableDays(year: number, month: number) {
+// --- Pobierz dostępne dni od dziś do dziś następnego miesiąca +1 ---
+async function loadAvailableDays() {
     try {
+        const today = new Date()
+        const nextMonthSameDay = new Date(today)
+        nextMonthSameDay.setMonth(today.getMonth() + 1)
+        const diffTime = nextMonthSameDay.getTime() - today.getTime()
+        const daysAhead = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1
+
         const res = await axiosInstance.get('/schedule/available-days', {
             params: {
-                year,
-                month: month + 1, // jeśli API liczy miesiące 1-12
+                start_date: today.toISOString().split('T')[0],
+                days_ahead: daysAhead,
             },
         })
-        availableDays.value = res.data
+
+        // godziny które chcesz wycinać
+        const blockedHours = ["07:30", "18:45", "19:30", "20:15"]
+
+        // mapowanie i filtrowanie godzin
+        availableDays.value = res.data.map((day: any) => ({
+            ...day,
+            doctors: day.doctors.map((doc: any) => ({
+                ...doc,
+                free_slots: doc.free_slots.filter((slot: string) => !blockedHours.includes(slot)),
+            })),
+        }))
     } catch (error) {
         console.error('Błąd ładowania dostępnych dni:', error)
     }
 }
 
-// --- Generuj kalendarz z pustymi dniami dla wyrównania tygodnia ---
+
+// --- Generowanie dni z pustymi dniami dla wyrównania tygodnia ---
 function getAllDatesWithBlanks(year: number, month: number) {
     const daysArr: { day: number; date: string; isBlank: boolean }[] = []
-
     const firstDayDate = new Date(year, month, 1)
     let firstWeekday = firstDayDate.getDay()
     firstWeekday = firstWeekday === 0 ? 6 : firstWeekday - 1
@@ -145,17 +186,17 @@ function getAllDatesWithBlanks(year: number, month: number) {
 }
 
 const monthDaysWithBlanks = computed(() => getAllDatesWithBlanks(currentYear.value, currentMonth.value))
-
 const monthLabel = computed(() => {
     const date = new Date(currentYear.value, currentMonth.value)
     return date.toLocaleDateString('pl-PL', { year: 'numeric', month: 'long' })
 })
 
-// Sprawdzenie czy dany dzień jest dostępny (czy jest w availableDays)
+// Sprawdzenie dostępności
 function isAvailable(date: string) {
     return availableDays.value.some(day => day.date === date)
 }
 
+// Wybór daty
 function selectDate(date: string) {
     if (!isAvailable(date)) return
     selectedDate.value = date
@@ -164,12 +205,14 @@ function selectDate(date: string) {
     confirmed.value = null
 }
 
+// Wybór lekarza
 function selectPerson(doctor_id: number) {
     selectedPerson.value = doctor_id
     selectedTime.value = null
     confirmed.value = null
 }
 
+// Godziny dla wybranego lekarza
 const availableTimesForPerson = computed(() => {
     if (!selectedDate.value || !selectedPerson.value) return []
     const day = availableDays.value.find(d => d.date === selectedDate.value)
@@ -183,13 +226,7 @@ function selectTime(time: string) {
     confirmed.value = null
 }
 
-const form = ref({
-    name: '',
-    surname: '',
-    phone: '',
-    email: '',
-})
-
+// Rezerwacja
 async function book() {
     if (!selectedDate.value || !selectedPerson.value || !selectedTime.value) return
     if (!form.value.name || !form.value.surname || !form.value.phone || !form.value.email) return alert('Wypełnij wszystkie pola formularza')
@@ -212,10 +249,10 @@ async function book() {
             hour: selectedTime.value,
         }
 
-        // Odśwież dane z API po rezerwacji
-        await loadAvailableDays(currentYear.value, currentMonth.value)
+        // Odśwież dane
+        await loadAvailableDays()
 
-        // Reset wyborów i formularza
+        // Reset formularza
         selectedDate.value = null
         selectedPerson.value = null
         selectedTime.value = null
@@ -225,14 +262,13 @@ async function book() {
     }
 }
 
-// Kontrola nawigacji miesięcy
+// Nawigacja miesięcy
 const canGoPrev = computed(() => {
     return (
         currentYear.value > startYear ||
         (currentYear.value === startYear && currentMonth.value > startMonth)
     )
 })
-
 const canGoNext = computed(() => {
     const maxMonth = startYear * 12 + startMonth + maxMonthsAhead
     const currentMonthNumber = currentYear.value * 12 + currentMonth.value
@@ -244,9 +280,7 @@ function prevMonth() {
     if (currentMonth.value === 0) {
         currentMonth.value = 11
         currentYear.value -= 1
-    } else {
-        currentMonth.value -= 1
-    }
+    } else currentMonth.value -= 1
 }
 
 function nextMonth() {
@@ -254,192 +288,174 @@ function nextMonth() {
     if (currentMonth.value === 11) {
         currentMonth.value = 0
         currentYear.value += 1
-    } else {
-        currentMonth.value += 1
-    }
+    } else currentMonth.value += 1
 }
 
-// Watch na zmianę miesiąca, aby załadować dostępne dni
-watch(
-    [currentYear, currentMonth],
-    () => {
-        loadAvailableDays(currentYear.value, currentMonth.value)
-        selectedDate.value = null
-        selectedPerson.value = null
-        selectedTime.value = null
-        confirmed.value = null
-    },
-    { immediate: true }
-)
+// Watch na zmianę miesiąca
+watch([currentYear, currentMonth], () => {
+    loadAvailableDays()
+    selectedDate.value = null
+    selectedPerson.value = null
+    selectedTime.value = null
+    confirmed.value = null
+}, { immediate: true })
 </script>
 
 <style scoped>
-/* style według Twoich poprzednich założeń */
-
-.calendar {
-    max-width: 350px;
-    margin: auto;
-    font-family: sans-serif;
-    user-select: none;
-}
-
-.month-navigation {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 12px;
-}
-
-.month-navigation button {
-    background-color: #31a9ce;
-    border: none;
-    padding: 6px 12px;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.month-navigation button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-.month-navigation button:hover:not(:disabled) {
-    background-color: #2691b8;
-}
-
-.month-label {
-    font-weight: 600;
-    font-size: 1.1em;
-}
-
-.calendar-grid {
+.days-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
     gap: 6px;
+    margin-bottom: 12px;
 }
 
-.day {
-    padding: 8px;
-    text-align: center;
-    background: #eee;
-    border-radius: 4px;
+.day-cell {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+}
+
+.day-cell:hover {
+    background: #29afd81d;
+}
+
+.day-cell.other-month {
+    color: #9ca3af;
+    opacity: 0.6;
+}
+
+.day-cell.today {
+    box-shadow: inset 0 0 0 1px #31a9ce;
+}
+
+.day-cell.selected {
+    background: #31a9ce;
+    color: #fff;
+}
+
+.day-cell.disabled {
+    color: #d1d5db;
     cursor: not-allowed;
-    color: #aaa;
-    user-select: none;
+    pointer-events: none;
 }
 
-.day.available {
-    background: #dff0d8;
-    color: #2d572c;
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.month-label {
+    font-weight: 700;
+    margin-top: 1px;
+    text-transform: capitalize;
+    /* color: #31a9ce9f; */
+    font-size: 20px;
+}
+
+.nav-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
     cursor: pointer;
 }
 
-.day.available:hover {
-    background: #bde5a1;
+.nav-btn:hover {
+    background: #29afd81d;
 }
 
-.day.selected {
-    background: #31a9ce;
-    color: white;
+.weekday-row {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 6px;
 }
 
-.day.blank {
-    background: transparent;
-    cursor: default;
-}
-
-.person-picker {
-    margin-top: 15px;
+.weekday-cell {
+    padding: 4px 0;
+    color: #31a9ce9f;
+    font-weight: 600;
+    margin-bottom: 8px;
+    font-size: 16px;
 }
 
 .persons-grid {
     display: flex;
-    gap: 10px;
-    margin-top: 5px;
+    gap: 8px;
     flex-wrap: wrap;
 }
 
 .person {
-    background: #eee;
-    padding: 6px 10px;
-    border-radius: 4px;
+    padding: 6px 13px;
+    border-radius: 10px;
+    height: 40px;
+    border: 1px solid #31a9ce;
     cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
+    background: white;
+    transition: all 0.2s;
 }
 
-.person.selected {
+.person.selected,
+.person.selected:hover {
     background: #31a9ce;
     color: white;
-}
-
-.time-picker {
-    margin-top: 15px;
 }
 
 .time-grid {
     display: flex;
+    gap: 8px;
     flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 5px;
+    margin-bottom: 12px;
 }
 
 .time {
-    background: #eee;
-    padding: 6px 10px;
-    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 10px;
+    border: 1px solid #31a9ce;
     cursor: pointer;
-    user-select: none;
-    white-space: nowrap;
+    height: 36px;
+    width: 67px;
+    text-align: center;
+    background: white;
+    transition: all 0.2s;
 }
 
-.time:hover {
-    background: #ddd;
-}
-
-.time.selected {
+.time.selected,
+.time.selected:hover {
     background: #31a9ce;
     color: white;
 }
 
-.user-data {
-    margin-top: 15px;
-    display: flex;
-    gap: 8px;
-    flex-direction: column;
+.time:hover,
+.person:hover {
+    background: #29afd81d;
 }
 
-.user-data input {
-    padding: 6px 10px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    font-size: 1em;
-}
-
-.btn-book {
-    background-color: #31a9ce;
-    border: none;
-    padding: 8px 15px;
-    color: white;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    max-width: 150px;
-}
-
-.btn-book:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.confirmation {
-    margin-top: 15px;
-    font-size: 14px;
-    color: green;
+h3 {
+    font-size: 17px;
     font-weight: 600;
-    text-align: center;
+    margin-top: 40px;
+    margin-bottom: 13px;
+}
+
+.border-calendar{
+    border: 2px solid #31a9ce;
+    border-radius: 12px;
 }
 </style>

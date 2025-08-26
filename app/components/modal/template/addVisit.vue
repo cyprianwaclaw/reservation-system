@@ -1,36 +1,39 @@
 <template>
     <div class="w-full">
         <p class="text-[32px] font-semibold -mt-[8px] mb-[25px]">Dodaj wizytę</p>
-
         <div class="flex w-full gap-[50px]">
             <div class="w-full relative select-none h-[450px]">
+                    <p class="text-[16px] font-semibold primary-color mb-[8px]">Pacjent</p>
+
                 <InputSearchSelect :key="selectPatientKey" v-model="selectPatient" :options="options"
-                    placeholder="Wybierz pacjenta" @search="onSearch" />
+                    placeholder="Szukaj pacjenta..." @search="onSearch" />
                 <p @click="showPatientInputs = !showPatientInputs"
-                    class="primary-color underline cursor-pointer mt-[12px] mb-[24px] text-[15px]">
+                    class="primary-color underline cursor-pointer mt-[21px] mb-[16px] text-[14px]">
                     Wpisz ręcznie
                 </p>
                 <Transition name="fade-slide">
                     <div class="w-full flex flex-col gap-[10px]" v-if="showPatientInputs">
-                        <InputBase v-model="firstName" placeholder="Wpisz imię" :disabled="!!selectPatient" />
-                        <InputBase v-model="surName" placeholder="Wpisz nazwisko" :disabled="!!selectPatient" />
-                        <InputBase v-model="email" placeholder="Wpisz e-mail" :disabled="!!selectPatient" />
-                        <InputBase v-model="phone" placeholder="Wpisz telefon" :disabled="!!selectPatient" />
+                        <InputBase v-model="firstName" name="name" placeholder="Imię" :disabled="!!selectPatient" />
+                        <InputBase v-model="surName" name="surname" placeholder="Nazwisko" :disabled="!!selectPatient" />
+                        <InputBase v-model="email" name="email" placeholder="E-mail" :disabled="!!selectPatient" />
+                        <InputBase v-model="phone" name="phone" placeholder="Numer telefonu" :disabled="!!selectPatient" />
                         <p @click="clearPatientSelection" v-if="selectPatient"
-                            class="underline cursor-pointer text-[#f43737] mt-[5px] text-[15px]">
-                            Usuń
+                            class="underline cursor-pointer text-[#f43737] mt-[5px] text-[14px]">
+                           Wyczyś
                         </p>
                     </div>
                 </Transition>
             </div>
             <div class="w-full flex flex-col gap-[10px]">
+                    <p class="text-[16px] font-semibold primary-color">Data wizyty</p>
+
                 <InputSelect v-model="newDate" :options="dateOptions" placeholder="Wybierz datę" />
                 <InputSelect v-model="newDoctor" :options="doctorOptions" placeholder="Wybierz lekarza"
-                    :disabled="newDate ? false : true" />
+                    :disabled="!newDate" />
                 <InputSelect v-model="newTime" :options="timeOptions" placeholder="Wybierz godzinę"
-                    :disabled="newDoctor ? false : true" />
+                    :disabled="!newDoctor" />
                 <div class="absolute bottom-[30px] right-[40px]">
-                    <Button class="primary-button" @click="addVisit()">Dodaj</Button>
+                    <button class="primary-button" @click="addVisit()">Dodaj</button>
                 </div>
             </div>
         </div>
@@ -38,80 +41,68 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
-import { useNuxtApp } from "nuxt/app";
-
-const axiosInstance = useNuxtApp().$axiosInstance as any;
+const axiosInstance = useNuxtApp().$axiosInstance as any
+const { setErrors } = useErrors()
+const { closeModal } = useCloseModal()
 
 const selectPatient = ref<number | null>(null);
-const selectPatientKey = ref(0); // wymusza remount InputSearchSelect
+const selectPatientKey = ref(0);
 const options = ref<{ label: string; value: number }[]>([]);
 const userData = ref<any>(null);
 const showPatientInputs = ref(false);
 
-// pola formularza
-const firstName = ref("");
-const surName = ref("");
-const email = ref("");
-const phone = ref("");
+const firstName = ref('');
+const surName = ref('');
+const email = ref('');
+const phone = ref('');
 
-const newDate = ref('')
-const newDoctor = ref(null as null | number)
-const newTime = ref('')
+const newDate = ref('');
+const newDoctor = ref<number | null>(null);
+const newTime = ref('');
+
+const schedule = ref<any[]>([]);
+
+onMounted(async () => {
+    const res = await axiosInstance.get('/schedule/available-days');
+    schedule.value = res.data;
+});
+
 
 let debounceTimeout: any = null;
 const onSearch = (query: string) => {
     clearTimeout(debounceTimeout);
-
     if (!query || query.length < 2) {
         options.value = [];
         return;
     }
-
     debounceTimeout = setTimeout(async () => {
         try {
-            const res = await axiosInstance.get("/allUsers", {
-                params: { search: query, limit: 10 },
-            });
-
+            const res = await axiosInstance.get('/allUsers', { params: { search: query, limit: 10 } });
             const groupedData = res.data?.data || {};
-            options.value = Object.values(groupedData)
-                .flat()
-                .map((user: any) => ({
-                    label: `${user.name} ${user.surname}`,
-                    value: user.id,
-                }));
-        } catch (err) {
-            console.error(err);
-        }
+            options.value = Object.values(groupedData).flat().map((u: any) => ({ label: u.name + ' ' + u.surname, value: u.id }));
+        } catch (e) { console.error(e) }
     }, 300);
-};
+}
 
-// obserwuj wybór pacjenta
-watch(selectPatient, async (id) => {
+watch(selectPatient, async id => {
     if (!id) return clearPatientInputs();
-
     try {
         const res = await axiosInstance.get(`/users/${id}`);
         userData.value = res.data;
-
-        firstName.value = res.data?.name || "";
-        surName.value = res.data?.surname || "";
-        email.value = res.data?.email || "";
-        phone.value = res.data?.phone || "";
-
+        firstName.value = res.data?.name || '';
+        surName.value = res.data?.surname || '';
+        email.value = res.data?.email || '';
+        phone.value = res.data?.phone || '';
         showPatientInputs.value = true;
-    } catch (err) {
-        console.error(err);
-    }
+    } catch (e) { console.error(e) }
 });
 
 function clearPatientInputs() {
     userData.value = null;
-    firstName.value = "";
-    surName.value = "";
-    email.value = "";
-    phone.value = "";
+    firstName.value = '';
+    surName.value = '';
+    email.value = '';
+    phone.value = '';
 }
 
 function clearPatientSelection() {
@@ -120,80 +111,71 @@ function clearPatientSelection() {
     clearPatientInputs();
 }
 
-const schedule = ref([]) as any
-
-onMounted(async () => {
-    const res = await axiosInstance.get('/schedule/available-days')
-    schedule.value = res.data
-
-})
 const doctorsForSelectedDate = computed(() => {
-    const day = schedule.value.find((d: any) => d.date === newDate.value)
-    return day ? day.doctors : []
-})
+    const day = schedule.value.find(d => d.date === newDate.value);
+    return day ? day.doctors : [];
+});
 
 const availableTimes = computed(() => {
-    const doc = doctorsForSelectedDate.value.find((d: any) => d.doctor_id === newDoctor.value)
-    return doc ? doc.free_slots : []
-})
+    const doc = doctorsForSelectedDate.value.find((d: any) => d.doctor_id === newDoctor.value);
+    return doc ? doc.free_slots : [];
+});
+
 const doctorOptions = computed(() =>
-    doctorsForSelectedDate.value.map((doc: any) => ({
-        value: doc.doctor_id,
-        label: `${doc.name} ${doc.surname}`,
-    }))
+    doctorsForSelectedDate.value.map((d: any) => ({ value: d.doctor_id, label: `${d.name} ${d.surname}` }))
 );
 
 const timeOptions = computed(() =>
-    availableTimes.value.map((time: any) => ({
-        value: time,
-        label: time
-    }))
+    availableTimes.value.map((t: any) => ({ value: t, label: t }))
 );
-
 
 function formatDateDDMMYYYY(dateStr: string) {
     const d = new Date(dateStr);
-    const day = String(d.getDate()).padStart(2, '0');
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const year = d.getFullYear();
-    return `${day}.${month}.${year}`;
+    return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
 }
 
 const dateOptions = computed(() =>
-    schedule.value.map((item: any) => ({
-        value: item.date,
-        label: formatDateDDMMYYYY(item.date),
-    }))
+    schedule.value.map(item => ({ value: item.date, label: formatDateDDMMYYYY(item.date) }))
 );
 
 const addVisit = async () => {
+
     const data = {
         doctor_id: newDoctor.value,
-        name: firstName.value,
-        surname: surName.value,
-        phone: phone.value,
-        email: email.value,
+        name: firstName.value.trim(),
+        surname: surName.value.trim(),
+        phone: phone.value.trim(),
+        email: email.value.trim(),
         date: newDate.value,
         start_time: newTime.value,
-        duration:45,
+        duration: 45,
     };
 
-    try {
-        const res = await axiosInstance.post('/schedule/reserve', data);
-        console.log('Wizyta dodana:', res.data);
+    if (
+        data.doctor_id &&
+        data.name &&
+        data.surname &&
+        data.phone &&
+        data.email &&
+        data.date &&
+        data.start_time
+    ) {
+        try {
+            await axiosInstance.post('/schedule/reserve', data);
 
-        clearPatientSelection()
-        newDate.value = ""
-        newDoctor.value = null
-        newTime.value = ""
-        showPatientInputs.value = false
-
-    } catch (err) {
-        console.error('Błąd podczas dodawania wizyty:', err);
+            clearPatientSelection()
+            newDate.value = '';
+            newDoctor.value = null;
+            newTime.value = '';
+            showPatientInputs.value = false;
+            closeModal()
+        } catch (err: any) {
+            if (err.response?.data?.errors) {
+                setErrors(err.response.data.errors);
+            }
+        }
     }
 }
-
-
 </script>
 
 <style scoped>

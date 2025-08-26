@@ -1,14 +1,22 @@
 <template>
-    <div class="flex w-full gap-[50px] h-full" v-if="visitData?.user">
+    <div class="flex w-full gap-[50px] h-full cursor-default" v-if="visitData?.user">
         <div class="w-full relative">
             <p class="primary-color font-semibold text-[13px]">Pacjent</p>
             <div class="flex place-items-center gap-[14px]">
                 <p class="text-[26px] font-bold">{{ visitData.user.name }} {{ visitData.user.surname }}</p>
             </div>
-            <p class="text-[16px] font-semibold mb-[8px] primary-color  mt-[30px]">Usługa: <span
+            <div class="mt-[6px] gap-[4px] flex flex-col">
+                <div class="flex place-items-center gap-[8px]">
+                    <p class="text-[#bababa] text-[15px]">{{ visitData.user.email }}</p>
+                    <span class="dot"/>
+                    <p class="text-[#bababa] text-[15px]">{{ visitData.user.phone }}</p>
+                </div>
+                <p class="text-[#bababa] text-[15px] -mt-[3px]">34 lata</p>
+            </div>
+            <p class="text-[15px] font-semibold  primary-color  mt-[24px]">Usługa: <span
                     class="font-medium text-black-own">Wizyta u
                     fizjoterapeuty</span></p>
-            <div class="w-[270px] bg-[#31a9ce29] rounded-xl p-4 mt-[14px]">
+            <div class="w-[270px] bg-[#31a9ce29] rounded-xl p-4 mt-[10px]">
                 <div class="flex place-items-center gap-[8px]">
                     <Icon name="ph:clock" size="54" class="primary-color" />
                     <div class="flex flex-col">
@@ -21,9 +29,9 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-[40px]">
+            <div class="mt-[38px]">
                 <p class="text-[16px] font-semibold mb-[8px] primary-color ">O pacjencie</p>
-                <div class="max-h-[135px] overflow-y-auto pr-[18px]">
+                <div class="max-h-[111px] overflow-y-auto pr-[10px]">
                     <p class="text-[16px]">
                         Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
                         incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
@@ -40,8 +48,8 @@
             <div class="w-full flex items-start gap-[20px] absolute bottom-0" v-if="isDelete">
                 <p class="font-semibold mt-[9px]">Czy na pewno odwołać?</p>
                 <div class="flex gap-[6px]">
-                    <Button class="remove-button" @click="confirmDelete()">Tak</Button>
-                    <Button class="primary-button" @click="isDelete = false">Nie</Button>
+                    <button class="remove-button" @click="confirmDelete()">Tak</button>
+                    <button class="primary-button" @click="isDelete = false">Nie</button>
                 </div>
             </div>
 
@@ -49,7 +57,7 @@
             <div v-if="isChangeDate" class="change-date-container">
                 <div class="w-full flex justify-between mb-[6px]">
                     <p class="flex font-semibold text-[17px] -mt-[6px]">Zmień termin wizyty</p>
-                    <Icon name="carbon:close" size="38" class="close-icon -mt-[14px] -mr-[10px]"
+                    <Icon name="carbon:close" size="32" class="close-icon -mt-[12px] -mr-[10px]"
                         @click="isChangeDate = false" />
                 </div>
                 <!-- Data -->
@@ -61,13 +69,13 @@
                 <!-- Przyciski -->
                 <div class="flex mt-[10px]">
                     <!-- <Button class="remove-button" @click="confirmChangeDate()">Potwierdź</Button> -->
-                    <Button class="primary-button" @click="confirmChangeDate()">Zapisz</Button>
+                    <button class="primary-button" @click="confirmChangeDate()">Zapisz</button>
                 </div>
             </div>
             <!-- Blok standardowych przycisków -->
             <div class="w-full flex justify-start gap-[6px] absolute bottom-0" v-if="!isDelete && !isChangeDate">
-                <Button class="primary-button" @click="openChangeDate()">Zmień termin</Button>
-                <Button class="remove-button" @click="isDelete = true">Odwołaj wizytę</Button>
+                <button class="primary-button" @click="openChangeDate()">Zmień termin</button>
+                <button class="remove-button" @click="isDelete = true">Odwołaj wizytę</button>
             </div>
         </div>
         <div class="w-full">
@@ -88,8 +96,8 @@
             <div>
                 <div class="relative mt-[18px]">
                     <textarea v-model="newNote" placeholder="Dodaj opis..." class="add-description"></textarea>
-                    <Button class="primary-button-ghost absolute bottom-[23px] right-[17px]" @click="addNote()">Dodaj
-                        notatkę</Button>
+                    <button class="primary-button-ghost absolute bottom-[23px] right-[17px]" @click="addNote()">Dodaj
+                        notatkę</button>
                 </div>
             </div>
         </div>
@@ -97,12 +105,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
-import { useNuxtApp } from 'nuxt/app';
-import gsap from 'gsap'
-
+const { closeModal } = useCloseModal()
 const axiosInstance = useNuxtApp().$axiosInstance as any;
-const emit = defineEmits(['close'])
+
 const props = defineProps({
     vistId: {
         type: Array,
@@ -118,6 +123,7 @@ const visitData = ref([]) as any
 const newNote = ref<string>('')
 const isDelete = ref<boolean>(false)
 const isChangeDate = ref<boolean>(false)
+const showModal = ref(false);
 
 onMounted(async () => {
     const res = await axiosInstance.get(`/schedule/visits/${props.vistId}`)
@@ -137,7 +143,7 @@ const addNote = async () => {
 
 const confirmDelete = async () => {
     await axiosInstance.delete(`/schedule/visits/${props.vistId}`)
-    emit('close', { reload: true })
+    closeModal()
 }
 
 const openChangeDate = async () => {
@@ -167,9 +173,8 @@ const confirmChangeDate = async () => {
         hour: newTime.value,
         doctor_id: newDoctor.value,
     })
-    console.log(newDate.value, newTime.value, newDoctor.value,)
     isChangeDate.value = false
-    emit('close', { reload: true })
+    closeModal()
 }
 
 const doctorOptions = computed(() =>
@@ -202,6 +207,7 @@ const dateOptions = computed(() =>
         label: formatDateDDMMYYYY(item.date),
     }))
 );
+
 </script>
 
 <style scoped>
@@ -271,5 +277,12 @@ const dateOptions = computed(() =>
     backdrop-filter: blur(5px);
     width: 100%;
     height: 100vh;
+}
+.dot {
+  display: inline-block;
+  width: 4px;
+  height: 4px;
+  background-color: #bababa;
+  border-radius: 50%;
 }
 </style>

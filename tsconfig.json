@@ -1,18 +1,38 @@
+// {
+//   // https://nuxt.com/docs/guide/concepts/typescript
+//   "files": [],
+//   "references": [
+//     {
+//       "path": "./.nuxt/tsconfig.app.json"
+//     },
+//     {
+//       "path": "./.nuxt/tsconfig.server.json"
+//     },
+//     {
+//       "path": "./.nuxt/tsconfig.shared.json"
+//     },
+//     {
+//       "path": "./.nuxt/tsconfig.node.json"
+//     }
+//   ],
+//   {
+//   "compilerOptions": {
+//     "strict": true,
+//     "noImplicitAny": false,       // pozwala używać `any` bez błędu
+//     "suppressImplicitAnyIndexErrors": true, // ukrywa błędy dla indeksowania obiektów
+//     "skipLibCheck": true          // ignoruje błędy w paczkach npm
+//   }
+// }
+// }
 {
-  // https://nuxt.com/docs/guide/concepts/typescript
-  "files": [],
-  "references": [
-    {
-      "path": "./.nuxt/tsconfig.app.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.server.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.shared.json"
-    },
-    {
-      "path": "./.nuxt/tsconfig.node.json"
+  "extends": "./.nuxt/tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"],
+      "@store/*": ["store/*"],
+      "*": ["node_modules/*"]
     }
-  ]
+  }
 }

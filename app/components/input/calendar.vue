@@ -33,7 +33,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
 import dayjs, { Dayjs } from 'dayjs';
 import 'dayjs/locale/pl';
 dayjs.locale('pl');

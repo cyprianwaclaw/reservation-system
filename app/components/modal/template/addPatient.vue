@@ -4,25 +4,33 @@
 
         <div class="flex w-full gap-[50px]">
             <div class="w-full relative select-none h-[450px]">
-                <!-- <InputSearchSelect :key="selectPatientKey" v-model="selectPatient" :options="options"
-                    placeholder="Wybierz pacjenta" @search="onSearch" />
-                <p @click="showPatientInputs = !showPatientInputs"
-                    class="primary-color underline cursor-pointer mt-[12px] mb-[24px] text-[15px]">
-                    Wpisz ręcznie
-                </p> -->
                 <div class="w-full flex flex-col gap-[10px]">
-                    <InputBase v-model="firstName" placeholder="Imię" />
-                    <InputBase v-model="surName" placeholder="Nazwisko"/>
-                    <InputBase v-model="email" placeholder="E-mail" />
-                    <InputBase v-model="phone" placeholder="Telefon" />
+                    <p class="text-[16px] font-semibold primary-color -mb-[2px]">Dane personalne</p>
+                    <InputBase v-model="firstName" name="name" placeholder="Imię" />
+                    <InputBase v-model="surName" name="surname" placeholder="Nazwisko" />
+                    <InputBase v-model="age" name="wiek" placeholder="Wiek" />
+                    <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Dane kontaktowe</p>
+                    <InputBase v-model="email" name="email" placeholder="E-mail" />
+                    <InputBase v-model="phone" name="phone" placeholder="Telefon" />
                 </div>
             </div>
             <div class="w-full flex flex-col gap-[10px]">
-                    <textarea v-model="description" placeholder="O pacjencie..." class="add-description min-h-[170px]"></textarea>
-
-
+                <p class="text-[16px] font-semibold primary-color -mb-[2px]">Pochodzenie</p>
+                <InputSelect v-model="patientType" :options="patientTypeOptions" placeholder="Wybierz rodzaj" />
+                        <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Napisz coś o pacjencie</p>
+                <textarea v-model="description" placeholder="O pacjencie..."
+                    class="add-description min-h-[170px]"></textarea>
                 <div class="absolute bottom-[30px] right-[40px]">
-                    <Button class="primary-button" @click="addPatient()">Dodaj</Button>
+                    <div class="flex place-items-center gap-[21px]">
+                        <Transition name="fade-slide">
+                            <div v-if="isSuccess" class="flex place-items-center gap-[5px]">
+                                <Icon name="ph:check-circle" size="28" class="text-[#37B342]" />
+                                <p class="text-[18px] font-medium text-[#37B342]">Dodano poprawnie pacjenta</p>
+                            </div>
+                        </Transition>
+
+                        <button class="primary-button" @click="addPatient()">Dodaj</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -30,23 +38,27 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
-import { useNuxtApp } from "nuxt/app";
-
 const axiosInstance = useNuxtApp().$axiosInstance as any;
+const { setErrors } = useErrors()
 
-const selectPatient = ref<number | null>(null);
-const selectPatientKey = ref(0); // wymusza remount InputSearchSelect
-const options = ref<{ label: string; value: number }[]>([]);
-const userData = ref<any>(null);
-
-// pola formularza
 const firstName = ref("");
 const surName = ref("");
 const email = ref("");
 const phone = ref("");
+const age = ref("");
+const patientType = ref('')
 const description = ref("")
+const isSuccess = ref()
 
+const patientTypeOptions = ref<{ value: string; label: string }[]>([
+    { value: 'Prywatny', label: 'Prywatny' },
+    { value: 'Klub gimnastyki', label: 'Klub gimnastyki' },
+    { value: 'AWF', label: 'AWF' },
+    { value: 'WKS', label: 'WKS' },
+    { value: 'Od Grzegorza', label: 'Od Grzegorza' },
+    { value: 'DK', label: 'DK' },
+    { value: 'DT', label: 'DT' }
+])
 
 function clearPatientInputs() {
     firstName.value = "";
@@ -54,6 +66,8 @@ function clearPatientInputs() {
     email.value = "";
     phone.value = "";
     description.value = "";
+    age.value = "";
+    patientType.value = "";
 }
 
 const addPatient = async () => {
@@ -63,20 +77,34 @@ const addPatient = async () => {
         surname: surName.value,
         phone: phone.value,
         email: email.value,
-        // description: description.value,
-
+        opis: description.value,
+        wiek: age.value,
+        rodzaj_pacjenta: patientType.value,
     }
 
-    try {
-        const res = await axiosInstance.post('/add-patients', data);
-        console.log('Wizyta dodana:', res.data);
-        clearPatientInputs()
-
-    } catch (err) {
-        console.error('Błąd podczas dodawania wizyty:', err);
+    if (
+        data.name &&
+        data.surname &&
+        data.phone &&
+        data.email &&
+        data.opis &&
+        data.wiek &&
+        data.rodzaj_pacjenta
+    ) {
+        try {
+            const res = await axiosInstance.post('/add-patients', data);
+            isSuccess.value = res.data.message == 'Pacjent dodany pomyślnie' ? true : false
+            clearPatientInputs()
+            setTimeout(() => {
+                isSuccess.value = false
+            }, 1200)
+        } catch (err: any) {
+            if (err.response?.data?.errors) {
+                setErrors(err.response.data.errors);
+            }
+        }
     }
 }
-
 
 </script>
 
@@ -86,10 +114,14 @@ const addPatient = async () => {
     transition: all 0.4s ease;
 }
 
-.fade-slide-enter-from,
 .fade-slide-leave-to {
     opacity: 0;
-    transform: translateY(-5px);
+    transform: translateY(-10px);
+}
+
+.fade-slide-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
 }
 
 .fade-slide-enter-to,

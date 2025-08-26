@@ -30,66 +30,108 @@
                     </div>
                 </div>
             </div>
-
             <!-- Szczegóły pojedynczego użytkownika -->
             <div class="w-full relative">
-                <Transition name="fade-slide" mode="out-in">
-                    <div v-if="singleUser" :key="singleUser.id"
-                        class="max-h-[450px] overflow-y-auto border-scroll-container pb-[28px]">
-                        <p class="primary-color font-semibold text-[13px]">Pacjent</p>
-                        <div class="flex place-items-center gap-[14px]">
-                            <p class="text-[26px] font-bold">{{ singleUser.name }} {{ singleUser.surname }}</p>
-                        </div>
-                        <div class="mt-[15px] gap-[5px] flex flex-col">
-                            <p class="text-gray-500 text-[16px]">{{ singleUser.email }}</p>
-                            <p class="text-gray-500 text-[16px]">111111111</p>
-                            <p class="text-gray-500 text-[16px] -mt-[2px]">34 lata</p>
-                        </div>
-                        <div class="mt-[36px]">
-                            <p class="text-[18px] font-semibold mb-[8px]">O pacjencie</p>
-                            <div class="pr-[18px] border-scroll-container">
-                                <p class="text-[16px]">
-                                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                                    incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                                    exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
-                                    irure
-                                    dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                                    pariatur.
-                                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-                                    mollit anim id est laborum.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="w-full mt-[36px]">
-                            <p class="text-[18px] font-semibold mb-[13px]">Poprzednie wizyty</p>
-                            <div class="max-h-[300px] overflow-y-auto border-scroll-container"
-                                v-if="singleUser.visits.length > 0">
-                                <div v-for="(single, index) in  singleUser?.visits" :key="index"
-                                    class="w-full py-[18px] px-[18px] rounded-xl bg-[#f0f0f097]"
-                                    :class="index === 0 ? 'mt-[0px]' : 'mt-[10px]'">
-                                    <div class="flex justify-between place-items-center w-full">
-                                        <p class="text-[14px] text-[#a1a1a1d5] -mt-[2px]">{{ single?.visit_details?.date }},
-                                            {{ single?.visit_details?.start_time }} - {{ single?.visit_details?.end_time }}
-                                        </p>
-                                        <p class="text-[14px] text-[#888888d5]  -mt-[2px] font-medium">{{
-                                            single?.visit_details.doctor.name }}</p>
+                <!-- <Transition name="fade-slide" mode="out-in"> -->
 
-                                    </div>
-                                    <p class="text-[17px] text-[#4f4f4f] mt-[3px]">{{ single?.text }}</p>
+                <div v-if="isEdit" class="max-h-[450px] overflow-y-auto border-scroll-container pb-[28px]">
+                    <div class="flex gap-[7px] place-items-center cursor-pointer back-icon">
+                        <Icon name="ph:arrow-left" size="21" class="cursor-pointer" />
+                        <button class="cursor-pointer" @click="toggleEdit()">Powrót</Button>
+                    </div>
+                    <div class="w-full flex flex-col gap-[10px] mt-[40px]">
+                        <p class="text-[16px] font-semibold primary-color -mb-[2px]">Dane personalne</p>
+                        <InputBase v-model="firstName" name="name" placeholder="Imię" />
+                        <InputBase v-model="surName" name="surname" placeholder="Nazwisko" />
+                        <InputBase v-model="age" name="wiek" placeholder="Wiek" />
+                        <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Dane kontaktowe</p>
+                        <InputBase v-model="email" name="email" placeholder="E-mail" />
+                        <InputBase v-model="phone" name="phone" placeholder="Telefon" />
+                    </div>
+                    <div class="w-full flex flex-col gap-[10px] mt-[24px]">
+                        <p class="text-[16px] font-semibold primary-color -mb-[2px]">Pochodzenie</p>
+                        <InputSelect v-model="patientType" :options="patientTypeOptions" placeholder="Wybierz rodzaj" />
+                        <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Napisz coś o pacjencie</p>
+                        <textarea v-model="description" placeholder="O pacjencie..."
+                            class="add-description min-h-[170px]"></textarea>
+                    </div>
+                    <div class="flex place-items-center gap-[21px]">
+                        <button class="primary-button mt-[35px]" @click="updatePatient()">Zapisz</Button>
+                        <Transition name="fade-slide">
+                            <div v-if="isSuccess" class="flex place-items-center gap-[5px] mt-[36px]">
+                                <Icon name="ph:check-circle" size="28" class="text-[#37B342]" />
+                                <p class="text-[18px] font-medium text-[#37B342]">Zapisano zmiany</p>
+                            </div>
+                        </Transition>
+                    </div>
+                </div>
+                <!-- </Transition> -->
+                <!-- <Transition name="fade-slide" mode="out-in"> -->
+                <div v-if="!isEdit">
+                    <!-- </div> -->
+                    <Transition name="fade" mode="out-in">
+                        <div v-if="singleUser" :key="singleUser.id"
+                            class="max-h-[450px] overflow-y-auto border-scroll-container pb-[28px]">
+                            <p class="primary-color font-semibold text-[13px]">{{ singleUser.patient_type }}</p>
+                            <div class="flex place-items-center gap-[14px]">
+                                <p class="text-[26px] font-bold">{{ singleUser.name }} {{ singleUser.surname }}</p>
+                            </div>
+                            <div class="mt-[15px] gap-[5px] flex flex-col">
+                                <p class="text-gray-500 text-[16px]">{{ singleUser.email }}</p>
+                                <p class="text-gray-500 text-[16px] -mt-[2px]">{{ singleUser.phone }}</p>
+                                <p class="text-gray-500 text-[16px] -mt-[3px]">{{ singleUser.age }}</p>
+                            </div>
+                            <div class="mt-[34px]">
+                                <p class="text-[18px] font-semibold mb-[8px] primary-color ">O pacjencie</p>
+                                <div class="pr-[18px] border-scroll-container">
+                                    <p class="text-[16px]">
+                                        {{ singleUser.description }}
+                                    </p>
                                 </div>
                             </div>
-                            <div v-else>
-                                <p class="text-[#8b8b8b6a] font-bold text-[20px] -mt-[3px]">Brak wizyt</p>
+                            <div class="w-full mt-[34px]">
+                                <p class="text-[18px] font-semibold mb-[13px] primary-color">Poprzednie wizyty</p>
+                                <div class="max-h-[300px] overflow-y-auto border-scroll-container"
+                                    v-if="singleUser.visits.length > 0">
+                                    <div v-for="(single, index) in  singleUser?.visits" :key="index"
+                                        class="w-full py-[18px] px-[18px] rounded-xl bg-[#f0f0f097]"
+                                        :class="index === 0 ? 'mt-[0px]' : 'mt-[10px]'">
+                                        <div class="flex justify-between place-items-center w-full">
+                                            <p class="text-[14px] text-[#a1a1a1d5] -mt-[2px]">{{
+                                                single?.visit_details?.date
+                                            }},
+                                                {{ single?.visit_details?.start_time }} - {{
+                                                    single?.visit_details?.end_time
+                                                }}
+                                            </p>
+                                            <p class="text-[14px] text-[#888888d5]  -mt-[2px] font-medium">{{
+                                                single?.visit_details.doctor.name }}</p>
+                                        </div>
+                                        <p class="text-[17px] text-[#4f4f4f] mt-[3px]">{{ single?.text }}</p>
+                                    </div>
+                                </div>
+                                <div v-else>
+                                    <p class="text-[#8b8b8b6a] font-bold text-[20px] -mt-[3px]">Brak wizyt</p>
+                                </div>
+                            </div>
+                            <div class="w-full flex items-start gap-[20px] mt-[40px]">
+
+                                <div class="gap-[20px] w-full flex " v-if="isDelete">
+                                    <p class="font-semibold mt-[9px]">Czy na pewno usunć pacjenta?</p>
+                                    <div class="flex gap-[6px]">
+                                        <button class="remove-button" @click="confirmDelete(singleUser.id)">Tak</Button>
+                                        <button class="primary-button" @click="isDelete = false">Nie</Button>
+                                    </div>
+                                </div>
+                                <div v-else class="w-full flex justify-start gap-[6px]">
+                                    <button class="primary-button" @click="toggleEdit()">Edytuj pacjenta</Button>
+                                    <button class="remove-button" @click="isDelete = true">Usuń</Button>
+                                </div>
                             </div>
                         </div>
-                        <div class="w-full flex justify-start gap-[6px] mt-[40px]"
-                            >
-                            <Button class="primary-button">Edytuj pacjenta</Button>
-                            <Button class="remove-button">Usuń</Button>
-                        </div>
-                        <!-- <pre>{{ singleUser.visits }}</pre> -->
-                    </div>
-                </Transition>
+                    </Transition>
+                </div>
+                <!-- </Transition> -->
             </div>
         </div>
         <!-- Pulse loader overlay -->
@@ -104,10 +146,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
-import { useNuxtApp } from 'nuxt/app';
-
 const axiosInstance = useNuxtApp().$axiosInstance as any;
+const { setErrors } = useErrors()
 
 const allPatient = ref({}) as any;
 const singleUser = ref(null) as any;
@@ -118,6 +158,35 @@ const limit = 60;
 let offset = 0;
 let allLoaded = false;
 let debounceTimeout: any = null;
+
+
+
+const firstName = ref("");
+const surName = ref("");
+const email = ref("");
+const phone = ref("");
+const age = ref("");
+const patientType = ref('')
+const description = ref("")
+const isSuccess = ref()
+
+const patientTypeOptions = ref<{ value: string; label: string }[]>([
+    { value: 'Prywatny', label: 'Prywatny' },
+    { value: 'Klub gimnastyki', label: 'Klub gimnastyki' },
+    { value: 'AWF', label: 'AWF' },
+    { value: 'WKS', label: 'WKS' },
+    { value: 'Od Grzegorza', label: 'Od Grzegorza' },
+    { value: 'DK', label: 'DK' },
+    { value: 'DT', label: 'DT' }
+])
+
+
+const props = defineProps<{
+    patientId?: number
+}>()
+
+const isDelete = ref<boolean>(false)
+const isEdit = ref<boolean>(false)
 
 const containerRef = ref<HTMLElement | null>(null);
 
@@ -166,17 +235,114 @@ const onSearch = () => {
     }, 200);
 };
 
+const confirmDelete = async (id: number) => {
+    try {
+        await axiosInstance.delete(`/patient-delete/${id}`);
+
+        allPatient.value = {};
+        offset = 0;
+        allLoaded = false;
+        await fetchPatient();
+
+        isDelete.value = false;
+        if (singleUser.value?.id === id) {
+            singleUser.value = null;
+        }
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+
 const fetchSingleUser = async (id: number) => {
     try {
         const res = await axiosInstance.get(`/users/${id}`);
         singleUser.value = res.data;
+        isDelete.value = false
     } catch (error) {
         console.error(error);
     }
 };
 
+function clearPatientInputs() {
+    firstName.value = "";
+    surName.value = "";
+    email.value = "";
+    phone.value = "";
+    description.value = "";
+    age.value = "";
+    patientType.value = "";
+}
+
+
+const toggleEdit = () => {
+    isEdit.value = !isEdit.value
+
+    if (isEdit.value === true) {
+        firstName.value = singleUser.value.name
+        surName.value = singleUser.value.surname
+        email.value = singleUser.value.email
+        phone.value = singleUser.value.phone
+        age.value = String(singleUser.value.age).split(' ')[0] as any
+        patientType.value = singleUser.value.patient_type
+        description.value = singleUser.value?.description
+    } else {
+        console.log('wyjscie z edycji')
+    }
+}
+
+const updatePatient = async () => {
+    if (!singleUser.value) return;
+
+    const data: Record<string, any> = {};
+
+    if (firstName.value !== singleUser.value.name) data.name = firstName.value;
+    if (surName.value !== singleUser.value.surname) data.surname = surName.value;
+    if (phone.value !== singleUser.value.phone) data.phone = phone.value;
+    if (email.value !== singleUser.value.email) data.email = email.value;
+    if (description.value !== singleUser.value.description) data.opis = description.value;
+    if (age.value !== String(singleUser.value.age).split(' ')[0]) data.wiek = age.value;
+    if (patientType.value !== singleUser.value.patient_type) data.rodzaj_pacjenta = patientType.value;
+
+    // Jeżeli nie ma żadnych zmian, nic nie wysyłamy
+    if (Object.keys(data).length === 0) return;
+
+    try {
+        const res = await axiosInstance.patch(`/update-patient/${singleUser.value.id}`, data);
+        isSuccess.value = res.data.message === 'User updated successfully';
+
+        clearPatientInputs();
+
+        setTimeout(() => {
+            isSuccess.value = false;
+            toggleEdit();
+        }, 1200);
+
+        // Odświeżamy pełną listę pacjentów
+        const currentUserId = singleUser.value?.id;
+        allPatient.value = {};
+        offset = 0;
+        allLoaded = false;
+        await fetchPatient();
+
+        // Po pobraniu listy, ponownie pobieramy aktualnego pacjenta
+        if (currentUserId) {
+            await fetchSingleUser(currentUserId);
+        }
+
+    } catch (err: any) {
+        if (err.response?.data?.errors) {
+            setErrors(err.response.data.errors);
+        }
+    }
+};
+
 onMounted(() => {
-    fetchPatient();
+    fetchPatient()
+
+    if (props.patientId) {
+        fetchSingleUser(props.patientId)
+    }
 
     if (!containerRef.value) return;
 
@@ -315,28 +481,50 @@ onMounted(() => {
 }
 
 /* Animacja fade + slide dla singleUser */
-.fade-slide-enter-active,
-.fade-slide-leave-active {
+.fade-enter-active,
+.fade-leave-active {
     transition: all 0.25s ease-in-out;
 }
 
-.fade-slide-enter-from {
+.fade-enter-from {
     opacity: 0;
     /* transform: translateX(-20px); */
 }
 
-.fade-slide-enter-to {
+.fade-enter-to {
     opacity: 1;
     /* transform: translateX(0); */
 }
 
-.fade-slide-leave-from {
+.fade-leave-from {
     opacity: 1;
     transform: translateX(0);
 }
 
-.fade-slide-leave-to {
+.fade-leave-to {
     opacity: 0;
     /* transform: translateX(50px);  */
+}
+
+
+.fade-slide-enter-active,
+.fade-slide-leave-active {
+    transition: all 0.4s ease;
+}
+
+.fade-slide-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.fade-slide-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.fade-slide-enter-to,
+.fade-slide-leave-from {
+    opacity: 1;
+    transform: translateY(0);
 }
 </style>

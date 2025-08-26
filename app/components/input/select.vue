@@ -21,7 +21,6 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, defineProps, defineEmits, onMounted, onBeforeUnmount } from 'vue';
 
 interface Option {
     value: string | number;
@@ -29,7 +28,7 @@ interface Option {
 }
 
 const props = defineProps<{
-    modelValue: string | number;
+    modelValue: any;
     options: Option[];
     placeholder?: string;
     label?: string;
@@ -79,7 +78,6 @@ onBeforeUnmount(() => {
 
 .placeholder {
     color: #cacaca;
-
     font-size: 16px;
 }
 

@@ -84,11 +84,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
-import { useNuxtApp, useCookie } from 'nuxt/app';
 import dayjs, { Dayjs } from 'dayjs';
 import isBetweenPlugin from 'dayjs/plugin/isBetween';
 import 'dayjs/locale/pl';
+const { isModalOpen } = useCloseModal()
 
 dayjs.locale('pl');
 dayjs.extend(isBetweenPlugin);
@@ -97,12 +96,18 @@ const axiosInstance = useNuxtApp().$axiosInstance as any;
 const centerDayCookie = useCookie('centerDay');
 const rowHeight = 50;
 const startHour = 7;
-const endHour = 22;
+const endHour = 21;
 const columnWidth = 100;
 const timeColWidth = 75;
 const isLoading = ref(true)
 const currentWeekCookie = useCookie('currentWeekStart');
 
+watch(isModalOpen, async (newValue: any) => {
+    if (newValue === false) {
+        showModal.value = false;
+        await fetchData()
+    }
+})
 
 const doctors = [
     { id: 1, name: 'Michał' },
@@ -154,7 +159,7 @@ async function fetchData() {
 }
 
 const showModal = ref(false);
-const vistId = ref();
+const vistId = ref() as any
 
 function onEventClick(event: any) {
     if (event.type === 'visit') {
@@ -163,11 +168,8 @@ function onEventClick(event: any) {
     }
 }
 
-const handleModalClose = (payload: any) => {
+const handleModalClose = () => {
     showModal.value = false;
-    if (payload?.reload) {
-        fetchData();
-    }
 };
 
 function setWeekStartFromCookieOrToday() {

@@ -20,15 +20,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onBeforeUnmount } from "vue";
-
 interface Option {
     label: string;
     value: number | string;
 }
 
 const props = defineProps<{
-    modelValue: number | string | null;
+    modelValue: any;
     options: Option[];
     placeholder?: string;
 }>();

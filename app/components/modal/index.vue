@@ -1,11 +1,8 @@
 <template>
     <Transition>
-        <div class="modal-conatiner">
+        <div class="modal-conatiner" @click="resetErrors()">
             <div class="blur-background-update" v-if="props.modalActive" @click="$emit('close')" />
-            <Transition
-      @before-enter="onBefore"
-      @leave="onLeave"
-    >
+            <Transition @before-enter="onBefore" @leave="onLeave">
                 <div class="modal-view p-[20px]" v-if="props.modalActive">
                     <div class="close-icon-div">
                         <Icon name="carbon:close" size="40" class="close-icon -mt-[14px] -mr-[10px]"
@@ -14,7 +11,7 @@
                     <div class="flex w-full h-full -mt-[23px] p-5">
                         <ModalTemplateVisit :vistId="data" v-if="component === 'visit'" />
                         <ModalTemplateAddPatient :vistId="data" v-if="component === 'addPatient'" />
-                        <ModalTemplateAllPatient :vistId="data" v-if="component === 'allPatient'" />
+                        <ModalTemplateAllPatient :patientId="data" v-if="component === 'allPatient'" />
                         <ModalTemplateAddVisit :vistId="data" v-if="component === 'addVisit'" />
                         <ModalTemplateVacation :vistId="data" v-if="component === 'vacation'" />
                     </div>
@@ -26,21 +23,20 @@
 
 <script setup lang="ts">
 import gsap from 'gsap'
+const { openModal } = useCloseModal()
 
+const { resetErrors } = useErrors();
 const emit = defineEmits(['close'])
-const props = defineProps({
-    data: {
-        type: Array,
-        required: false,
-    },
-    component: {
-        type: String,
-        required: false,
-    },
-    modalActive: {
-        type: Boolean,
-        required: true,
-    },
+
+const props = defineProps<{
+    data?: any
+    component?: string
+    modalActive: boolean
+}>()
+
+watch(props, (newValue: any)=> {
+    newValue.modalActive ? openModal() : ''
+    console.log(newValue)
 })
 
 const onBefore = (el: any) => {

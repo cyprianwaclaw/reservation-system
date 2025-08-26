@@ -1,9 +1,11 @@
 <template>
     <Modal :component="modalName" :modalActive="showModal" @close="handleModal('allPatient')" />
-    <div class="header flex w-full justify-between place-items-center px-[28px] cursor-default" ref="root" v-if="!isLoading">
+    <div class="header flex w-full justify-between place-items-center px-[28px] cursor-default" ref="root"
+        v-if="!isLoading">
         <img class="logo" src="@/assets/images/logo.png" />
-        <div class="flex gap-[6px]">
-            <div class="flex place-items-center gap-[11px] button-action-users select-none" @click="handleModal('allPatient')">
+        <div class="flex gap-[6px]" v-if="router.currentRoute.value?.name !== 'index'">
+            <div class="flex place-items-center gap-[11px] button-action-users select-none"
+                @click="handleModal('allPatient')">
                 <Icon name="ph:users-bold" size="28" class="primary-color" />
                 <p class="font-semibold text-[17px] mt-[1px] text-black-own ">Pacjenci</p>
             </div>
@@ -12,20 +14,23 @@
     </div>
 </template>
 <script lang="ts" setup>
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
-
 const showModal = ref(false);
 const isLoading = ref(true)
 const modalName = ref('')
+const router = useRouter()
 
 const handleModal = (name: string) => {
     modalName.value = name
     showModal.value = !showModal.value;
 };
 onMounted(() => {
-    setTimeout(() => {        
-        isLoading.value = false
-    }, 970)
+    if (router.currentRoute.value?.name=='index') {
+         isLoading.value = false
+    } else {
+        setTimeout(() => {
+            isLoading.value = false
+        }, 970)
+    }
 })
 </script>
 <style scoped>

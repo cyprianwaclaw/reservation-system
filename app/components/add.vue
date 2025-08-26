@@ -15,20 +15,27 @@
     </div>
 </template>
 <script setup lang="ts">
-import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
-import { useNuxtApp } from 'nuxt/app';
+const { isModalOpen, openModal, closeModal } = useCloseModal()
 
 const isOpenAdd = ref(false)
 const root = ref<HTMLElement | null>(null);
 const showModal = ref(false);
-const vistId = ref(16);
+const vistId = ref() as any
 const modalName = ref('')
+
 
 const handleModal = (name: string) => {
     modalName.value = name
     isOpenAdd.value = false;
     showModal.value = !showModal.value;
-};
+}
+
+watch(isModalOpen, (newValue: any) => {
+    if (newValue === false) {
+        showModal.value = false
+    }
+})
+
 const handleClickOutside = (event: MouseEvent) => {
     if (root.value && !root.value.contains(event.target as Node)) {
         isOpenAdd.value = false;
