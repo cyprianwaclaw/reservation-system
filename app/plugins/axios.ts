@@ -5,7 +5,8 @@ export default defineNuxtPlugin(() => {
 
     // const auth = useAuth();
     // const token = auth?.token
-    const API_URL = useRuntimeConfig().public.API_URL
+    // const API_URL  = 'http://localhost/api'
+    const API_URL = 'https://api.fizjoterapia-kaczmarek.pl/api'
     const axiosInstance = axios.create({
         baseURL: API_URL,
         headers: {
