@@ -113,7 +113,7 @@ const doctors = [
     { id: 1, name: 'Michał' },
     { id: 2, name: 'Grzegorz' },
     { id: 3, name: 'Ola' },
-    { id: 4, name: 'Kacper' },
+    { id: 4, name: 'Asia' },
 ];
 
 const today = dayjs();

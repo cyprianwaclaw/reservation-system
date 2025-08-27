@@ -3,23 +3,31 @@
         <p class="text-[32px] font-semibold -mt-[8px] mb-[25px]">Dodaj wizytę</p>
         <div class="flex w-full gap-[50px]">
             <div class="w-full relative select-none h-[450px]">
-                    <p class="text-[16px] font-semibold primary-color mb-[8px]">Pacjent</p>
+                    <p class="text-[16px] font-semibold primary-color mb-[8px]">Usługa</p>
+
+                                                        <InputSelect v-model="visitType" :options="visitTypeOptions"
+                                    placeholder="Wybierz usługę" />
+                    <p class="text-[16px] font-semibold primary-color mb-[8px] mt-[21px]">Pacjent</p>
 
                 <InputSearchSelect :key="selectPatientKey" v-model="selectPatient" :options="options"
                     placeholder="Szukaj pacjenta..." @search="onSearch" />
                 <p @click="showPatientInputs = !showPatientInputs"
-                    class="primary-color underline cursor-pointer mt-[21px] mb-[16px] text-[14px]">
+                    class="primary-color underline cursor-pointer mt-[12px] mb-[16px] text-[14px]">
                     Wpisz ręcznie
                 </p>
                 <Transition name="fade-slide">
                     <div class="w-full flex flex-col gap-[10px]" v-if="showPatientInputs">
-                        <InputBase v-model="firstName" name="name" placeholder="Imię" :disabled="!!selectPatient" />
-                        <InputBase v-model="surName" name="surname" placeholder="Nazwisko" :disabled="!!selectPatient" />
-                        <InputBase v-model="email" name="email" placeholder="E-mail" :disabled="!!selectPatient" />
-                        <InputBase v-model="phone" name="phone" placeholder="Numer telefonu" :disabled="!!selectPatient" />
+                                <div class="w-full flex flex-row gap-[10px]">
+                                    <InputBase v-model="firstName" name="name" placeholder="Imię" :disabled="!!selectPatient" />
+                                    <InputBase v-model="surName" name="surname" placeholder="Nazwisko" :disabled="!!selectPatient" />
+                        </div>
+                                <div class="w-full flex flex-row gap-[10px]">
+                                    <InputBase v-model="email" name="email" placeholder="E-mail" :disabled="!!selectPatient" />
+                                    <InputBase v-model="phone" name="phone" placeholder="Numer telefonu" :disabled="!!selectPatient" />
+</div>
                         <p @click="clearPatientSelection" v-if="selectPatient"
-                            class="underline cursor-pointer text-[#f43737] mt-[5px] text-[14px]">
-                           Wyczyś
+                            class="underline cursor-pointer text-[#f43737] mt-[5px] text-[12px]">
+                           Wyczyść
                         </p>
                     </div>
                 </Transition>
@@ -61,6 +69,18 @@ const newDoctor = ref<number | null>(null);
 const newTime = ref('');
 
 const schedule = ref<any[]>([]);
+
+const visitType = ref()
+
+const visitTypeOptions = ref([
+    { value: 'Zabiegi', label: 'Zabiegi' },
+    { value: 'Fizjoterapia', label: 'Fizjoterapia' },
+    { value: 'Rehabilitacja', label: 'Rehabilitacja' },
+    { value: 'Masaż', label: 'Masaż' },
+    { value: 'Kinezyterapia', label: 'Kinezyterapia' },
+    { value: 'Elektroterapia', label: 'Elektroterapia' },
+    { value: 'Terapia manualna', label: 'Terapia manualna' }
+])
 
 onMounted(async () => {
     const res = await axiosInstance.get('/schedule/available-days');
@@ -147,6 +167,7 @@ const addVisit = async () => {
         phone: phone.value.trim(),
         email: email.value.trim(),
         date: newDate.value,
+        type: visitType.value,
         start_time: newTime.value,
         duration: 45,
     };

@@ -61,7 +61,7 @@ const doctorList = [
     { value: 1, label: 'Michał' },
     { value: 2, label: 'Grzegorz' },
     { value: 3, label: 'Ola' },
-    { value: 4, label: 'Kacper' },
+    { value: 4, label: 'Asia' },
 ];
 
 const schedule = ref([]) as any;

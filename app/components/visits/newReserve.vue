@@ -317,7 +317,9 @@ async function book() {
             phone: form.value.phone,
             email: form.value.email,
             wiek: form.value.wiek,
+            opis: form.value.description,
             date: selectedDate.value,
+            type: visitType.value,
             start_time: selectedTime.value,
             duration: 45,
         })

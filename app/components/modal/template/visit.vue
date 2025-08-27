@@ -1,7 +1,7 @@
 <template>
     <div class="flex w-full gap-[50px] h-full cursor-default" v-if="visitData?.user">
         <div class="w-full relative">
-            <p class="primary-color font-semibold text-[13px]">Pacjent</p>
+            <p class="primary-color font-semibold text-[13px]">{{ visitData.user.type ? visitData.user.type  : 'Prywatny' }}</p>
             <div class="flex place-items-center gap-[14px]">
                 <p class="text-[26px] font-bold">{{ visitData.user.name }} {{ visitData.user.surname }}</p>
             </div>
@@ -11,11 +11,10 @@
                     <span class="dot"/>
                     <p class="text-[#bababa] text-[15px]">{{ visitData.user.phone }}</p>
                 </div>
-                <p class="text-[#bababa] text-[15px] -mt-[3px]">{{ visitData.user }}</p>
+                <p class="text-[#bababa] text-[15px] -mt-[3px]">{{ visitData.user.age }}</p>
             </div>
             <p class="text-[15px] font-semibold  primary-color  mt-[24px]">Usługa: <span
-                    class="font-medium text-black-own">Wizyta u
-                    fizjoterapeuty</span></p>
+                    class="font-medium text-black-own">{{visitData.current_visit.type}}</span></p>
             <div class="w-[270px] bg-[#31a9ce29] rounded-xl p-4 mt-[10px]">
                 <div class="flex place-items-center gap-[8px]">
                     <Icon name="ph:clock" size="54" class="primary-color" />
@@ -33,14 +32,7 @@
                 <p class="text-[16px] font-semibold mb-[8px] primary-color ">O pacjencie</p>
                 <div class="max-h-[111px] overflow-y-auto pr-[10px]">
                     <p class="text-[16px]">
-                        Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor
-                        incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud
-                        exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute
-                        irure
-                        dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-                        pariatur.
-                        Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-                        mollit anim id est laborum.
+  {{ visitData.user.description }}
                     </p>
                 </div>
             </div>
