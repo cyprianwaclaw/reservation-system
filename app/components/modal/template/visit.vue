@@ -1,7 +1,7 @@
 <template>
     <div class="flex w-full gap-[50px] h-full cursor-default" v-if="visitData?.user">
         <div class="w-full relative">
-            <p class="primary-color font-semibold text-[13px]">{{ visitData.user.type ? visitData.user.type  : 'Prywatny' }}</p>
+            <p class="primary-color font-semibold text-[13px]">{{ visitData.user.type ? visitData.user.type  : 'Zapisany przez panel' }}</p>
             <div class="flex place-items-center gap-[14px]">
                 <p class="text-[26px] font-bold">{{ visitData.user.name }} {{ visitData.user.surname }}</p>
             </div>

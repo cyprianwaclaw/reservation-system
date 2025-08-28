@@ -1,5 +1,5 @@
 <template>
-    <div class="calendar w-[450px]">
+    <div class="calendar w-[450px] select-none">
         <Transition name="fade-slide">
             <div v-if="isConfirmed" class="confirmation mt-[60px]">
                 <SuccessCheck />
@@ -42,6 +42,7 @@
 
                 <!-- Kalendarz -->
                 <div class="w-[370px] border-calendar mt-[44px] p-[25px]">
+                    <!-- <div class="mb-2 text-sm text-gray-500">Dostępnych dni: {{ availableDays.length }}</div> -->
                     <div class="calendar-header">
                         <Icon v-if="canGoPrev" @click="prevMonth" name="ph:caret-left-bold" size="27"
                             class="close-icon w-[40px] pl-[30px]" />
@@ -100,7 +101,7 @@
                     <div v-if="selectedDate && selectedPerson && selectedTime" class="booking-form">
                         <h3>Usługa</h3>
                         <InputSelect v-model="visitType" :options="visitTypeOptions"
-                            placeholder="Wybierz usługę, jaka Cię interesuje" />
+                            placeholder="Wybierz usługę, jaka Cię interesuje" class="-mt-[2px]" />
                     </div>
 
                     <!-- Formularz rezerwacji -->
@@ -113,18 +114,18 @@
                                     <InputBase v-model="form.surname" name="surname" placeholder="Nazwisko" />
                                 </div>
                                 <div class="w-full flex flex-row gap-[10px]">
-                                    <InputBase v-model="form.email" name="email" placeholder="E-mail" />
+                                    <!-- <InputBase v-model="form.email" name="email" placeholder="E-mail" /> -->
+                                    <div class="w-full flex flex-row gap-[14px] place-items-center">
+                                        <p>Ile masz lat?</p>
+                                        <div class="w-[114px]">
+                                            <InputBase v-model="form.wiek" name="wiek" placeholder="Wiek" />
+                                        </div>
+                                    </div>
                                     <InputBase v-model="form.phone" name="phone" placeholder="Telefon" />
                                 </div>
-                                <div class="w-full flex flex-row gap-[14px] place-items-center my-[12px]">
-                                    <p>Ile masz lat?</p>
-                                    <div class="w-[100px]">
-                                        <InputBase v-model="form.wiek" name="wiek" placeholder="Wiek" />
-                                    </div>
-                                </div>
-                                <textarea v-model="form.description" placeholder="Napisz coś o sobie..."
+                                <InputBase v-model="form.email" name="email" placeholder="E-mail" class="my-[12px]" />
+                                <textarea v-model="form.description" placeholder="Opisz swoje dolegliwości..."
                                     class="add-description min-h-[170px]"></textarea>
-
                             </div>
                             <div class="mt-[21px]">
                                 <label class="checkbox-wrapper">
@@ -143,9 +144,16 @@
 </template>
 
 <script setup lang="ts">
+// Przechowuje ID osoby, nad którą jest myszka
+const hoveredPerson = ref<number | null>(null)
 const axiosInstance = useNuxtApp().$axiosInstance as any
 const { setErrors } = useErrors()
 
+// Domyślna data: dziś + 14 dni
+const today = new Date()
+const defaultDate = new Date(today)
+defaultDate.setDate(today.getDate() + 15)
+const defaultDateStr = formatLocalDate(defaultDate)
 
 const test = ref(false)
 
@@ -154,6 +162,8 @@ interface Doctor {
     name: string
     surname: string
     free_slots: string[]
+    phone?: string
+    lastNote?: string
 }
 
 interface AvailableDay {
@@ -168,18 +178,17 @@ function formatLocalDate(date: Date): string {
     const day = date.getDate().toString().padStart(2, '0')
     return `${year}-${month}-${day}`
 }
-
 // --- Reactive states ---
 const currentYear = ref(new Date().getFullYear())
 const currentMonth = ref(new Date().getMonth())
-const today = new Date()
+// today już zadeklarowane wyżej
 const todayDateStr = formatLocalDate(today)
 const startYear = today.getFullYear()
 const startMonth = today.getMonth()
 
 const maxMonthsAhead = 1
 
-const selectedDate = ref<string | null>(null)
+const selectedDate = ref<string | null>(defaultDateStr)
 const selectedPerson = ref<number | null>(null)
 const selectedTime = ref<string | null>(null)
 const confirmed = ref<null | { date: string | any; doctor: string | any; hour: string | any, name: string | any }>(null)
@@ -192,13 +201,15 @@ const isConfirmed = ref(false)
 const visitType = ref()
 
 const visitTypeOptions = ref([
-    { value: 'Zabiegi', label: 'Zabiegi' },
-    { value: 'Fizjoterapia', label: 'Fizjoterapia' },
-    { value: 'Rehabilitacja', label: 'Rehabilitacja' },
-    { value: 'Masaż', label: 'Masaż' },
-    { value: 'Kinezyterapia', label: 'Kinezyterapia' },
-    { value: 'Elektroterapia', label: 'Elektroterapia' },
-    { value: 'Terapia manualna', label: 'Terapia manualna' }
+    { value: "Wkładki do butów", label: "Wkładki do butów - 400 zł" },
+    { value: "Analiza techniki biegu", label: "Analiza techniki biegu - 350 zł" },
+    { value: "Terapia manulna", label: "Terapia manulna - 180 zł" },
+    { value: "Terapia manulna + TECAR", label: "Terapia manulna + TECAR - 180 zł" },
+    { value: "Terapia manulna + usg", label: "Terapia manulna + usg - 200 zł" },
+    { value: "Fala uderzeniowa + terapia manulna", label: "Fala uderzeniowa + terapia manulna - 180 zł" },
+    { value: "Wywiad+ badanie+ USG", label: "Wywiad+ badanie+ USG - 250 zł" },
+    { value: "Wywiad + elementy badanie funkcjonalne/Analiza techniki biegu", label: "Wywiad + elementy badanie funkcjonalne/Analiza techniki biegu - 250 zł" },
+    { value: "Przeskórna elektroliza EPTE+USG", label: "Przeskórna elektroliza EPTE+USG - 250 zł" }
 ])
 
 const weekdays = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd']
@@ -207,17 +218,15 @@ const weekdays = ['Pn', 'Wt', 'Śr', 'Cz', 'Pt', 'Sb', 'Nd']
 const persons = computed(() => {
     if (!selectedDate.value) return []
     const day = availableDays.value.find(d => d.date === selectedDate.value)
-    return day ? day.doctors : []
+    // Filtrowanie: nie pokazuj lekarza o imieniu 'Ola'
+    return day ? day.doctors.filter(doc => doc.name !== 'Ola') : []
 })
 
 // --- Pobierz dostępne dni od dziś do dziś następnego miesiąca +1 ---
 async function loadAvailableDays() {
     try {
         const today = new Date()
-        const nextMonthSameDay = new Date(today)
-        nextMonthSameDay.setMonth(today.getMonth() + 1)
-        const diffTime = nextMonthSameDay.getTime() - today.getTime()
-        const daysAhead = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1
+        const daysAhead = 15
 
         const res = await axiosInstance.get('/schedule/available-days', {
             params: {
@@ -227,7 +236,7 @@ async function loadAvailableDays() {
         })
 
         // godziny które chcesz wycinać
-        const blockedHours = ["07:30", "18:45", "19:30", "20:15"]
+        const blockedHours = ["07:30", "08:15", "18:00", "18:45", "19:30", "20:15"]
 
         // mapowanie i filtrowanie godzin
         availableDays.value = res.data.map((day: any) => ({
@@ -358,9 +367,13 @@ const canGoPrev = computed(() => {
     )
 })
 const canGoNext = computed(() => {
-    const maxMonth = startYear * 12 + startMonth + maxMonthsAhead
+    // Strzałka do kolejnego miesiąca tylko jeśli defaultDate wypada w następnym miesiącu
+    const defaultMonth = defaultDate.getMonth()
+    const defaultYear = defaultDate.getFullYear()
     const currentMonthNumber = currentYear.value * 12 + currentMonth.value
-    return currentMonthNumber < maxMonth
+    const defaultMonthNumber = defaultYear * 12 + defaultMonth
+    // Pokazuj strzałkę tylko jeśli defaultDate jest w kolejnym miesiącu względem startMonth
+    return currentMonthNumber < defaultMonthNumber
 })
 
 function prevMonth() {

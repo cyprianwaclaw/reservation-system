@@ -27,7 +27,7 @@ watch(() => props.modelValue, (val) => {
 const onInput = (e: Event) => {
     const input = e.target as HTMLInputElement;
     if (props.name === "phone") {
-        input.value = input.value.replace(/[^1-9]/g, "").slice(0, 9);
+        input.value = input.value.replace(/[^0-9]/g, "").slice(0, 9);
     }
     if (props.name === "wiek") {
         input.value = input.value.replace(/[^1-9]/g, "").slice(0, 2);

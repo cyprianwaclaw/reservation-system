@@ -72,7 +72,7 @@
                     <Transition name="fade" mode="out-in">
                         <div v-if="singleUser" :key="singleUser.id"
                             class="max-h-[450px] overflow-y-auto border-scroll-container pb-[28px]">
-                            <p class="primary-color font-semibold text-[13px]">{{ singleUser.patient_type }}</p>
+                            <p class="primary-color font-semibold text-[13px]">{{ singleUser.patient_type ? singleUser.patient_type : 'Zapisany przez panel' }}</p>
                             <div class="flex place-items-center gap-[14px]">
                                 <p class="text-[26px] font-bold">{{ singleUser.name }} {{ singleUser.surname }}</p>
                             </div>
