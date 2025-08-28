@@ -33,7 +33,7 @@ onMounted(() => {
     } else {
         setTimeout(() => {
             isLoading.value = false
-        }, 970)
+        }, 1100)
     }
 })
 </script>

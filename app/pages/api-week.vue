@@ -5,6 +5,19 @@
     </div>
     <div class="flex place-items-center w-full justify-between px-[30px] pb-[24px] mt-[60px]"
         :class="isLoading == true ? 'window-loading' : ''">
+        <div v-if="hoverEvent && hoverPosition" class="event-tooltip"
+            :class="[tooltipAbove ? 'event-tooltip--top' : '', tooltipLeft ? 'event-tooltip--left' : '']"
+            :style="tooltipStyle">
+            <div class="event-tooltip-arrow"
+                :class="[tooltipAbove ? 'event-tooltip-arrow--top' : '', tooltipLeft ? 'event-tooltip-arrow--left' : '']">
+            </div>
+            <p class="text-white font-semibold">{{ hoverEvent.name }}</p>
+            <p class="text-white text-[13px]  mt-[2px]">{{ hoverEvent.phone }}</p>
+                <p class="text-white font-semibold text-[13px] mt-[12px]">Notatka</p>
+            <p class="text-white">umówiony na analizę bol biodra</p>
+                <p class="text-white font-semibold text-[13px]  mt-[12px]">Ostatnia wizyta</p>
+            <p class="text-white">{{ hoverEvent?.notes }}</p>
+        </div>
         <h1 class="font-semibold text-[32px]">Kalendarz z wizytami</h1>
         <InputCalendar v-model="displayDate" />
     </div>
@@ -49,7 +62,8 @@
                 }">
                     <div v-for="e in eventsForWeek" :key="e.id + '-' + e.type" class="event"
                         :class="[e.type, e.isPast ? 'event-past' : 'event-future']" :style="getEventPosition(e)"
-                        :title="eLabel(e)" @click="onEventClick(e)">
+                        :title="eLabel(e)" @click="onEventClick(e)" @mousemove="onEventHover($event, e)"
+                        @mouseleave="clearHover">
                         {{ eLabel(e) }}
                     </div>
                 </div>
@@ -67,17 +81,19 @@
                         </template>
                     </template>
                 </div>
-                <div v-if="currentTimeLinePosition >= 0" class="current-time-overlay" :style="{
-                    top: currentTimeLinePosition + 'px',
-                    left: (weekDays.findIndex((d) => d.date === todayDate) * doctors.length * columnWidth) + 'px',
-                    width: columnWidth + 'px',
-                    height: '20px',
-                    pointerEvents: 'none',
-                    position: 'absolute',
-                    zIndex: 21,
-                }">
+                <div v-if="currentTime < '21'|| currentTime>'7'">                
+                    <div v-if="currentTimeLinePosition >= 0" class="current-time-overlay" :style="{
+                        top: currentTimeLinePosition + 'px',
+                        left: (weekDays.findIndex((d) => d.date === todayDate) * doctors.length * columnWidth) + 'px',
+                        width: columnWidth + 'px',
+                        height: '20px',
+                        pointerEvents: 'none',
+                        position: 'absolute',
+                        zIndex: 21,
+                    }">
                     <div class="current-time-box">{{ currentTime }}</div>
-                </div>z
+                </div>
+                </div>
             </div>
         </div>
     </div>
@@ -101,13 +117,67 @@ const columnWidth = 100;
 const timeColWidth = 75;
 const isLoading = ref(true)
 const currentWeekCookie = useCookie('currentWeekStart');
+const hoverEvent = ref<any>(null)
+const hoverPosition = ref<{ x: number, y: number } | null>(null)
+const tooltipAbove = ref(false)
+const tooltipLeft = ref(false)
+const tooltipStyle = computed(() => {
+    if (!hoverPosition.value) return {};
+    const tooltipWidth = 260;
+    const tooltipHeight = 110;
+    const margin = 10;
+    let top = hoverPosition.value.y;
+    let left = hoverPosition.value.x;
+    let zIndex = 100;
+    tooltipAbove.value = false;
+    tooltipLeft.value = false;
+    if (window.innerHeight < top + tooltipHeight + margin) {
+        top = hoverPosition.value.y - tooltipHeight - margin;
+        tooltipAbove.value = true;
+    }
+    if (window.innerWidth < left + tooltipWidth + margin) {
+        left = hoverPosition.value.x - tooltipWidth - margin;
+        tooltipLeft.value = true;
+    }
+    return { position: 'absolute', left: left + 'px', top: top + 'px', zIndex };
+}) as any;
 
+function onEventHover(ev: MouseEvent, event: any) {
+    const rect = (ev.target as HTMLElement).getBoundingClientRect();
+    const tooltipWidth = 300;
+    const tooltipHeight = 220;
+    const margin = 10;
+    let x = rect.right + margin + window.scrollX;
+    let y = rect.top + window.scrollY;
+    let showLeft = false;
+    let showAbove = false;
+
+    // Jeśli tooltip nie mieści się po prawej stronie ekranu, pokaż go po lewej stronie eventu
+    if (window.innerWidth < x + tooltipWidth) {
+        x = rect.left - tooltipWidth - margin + window.scrollX;
+        showLeft = true;
+    }
+    // Jeśli tooltip nie mieści się na dole ekranu, pokaż go obok eventu, lekko poniżej górnej krawędzi eventu
+    if (window.innerHeight < y + tooltipHeight) {
+        y = rect.top - 182 + window.scrollY; // 10px poniżej górnej krawędzi eventu
+        showAbove = true;
+    }
+    hoverPosition.value = { x, y };
+    tooltipAbove.value = showAbove;
+    hoverEvent.value = event;
+}
+
+function clearHover() {
+    hoverEvent.value = null;
+    hoverPosition.value = null;
+}
 watch(isModalOpen, async (newValue: any) => {
     if (newValue === false) {
         showModal.value = false;
         await fetchData()
     }
 })
+// Usunięto duplikaty tooltipa
 
 const doctors = [
     { id: 1, name: 'Michał' },
@@ -154,6 +224,7 @@ async function fetchData() {
     const range = weekRange.value;
     const resVisits = await axiosInstance.get(`/schedule/all-visits?week=${encodeURIComponent(range)}`);
     visits.value = resVisits.data;
+    console.log(visits.value)
     const resVacations = await axiosInstance.get(`/vacations?week=${encodeURIComponent(range)}`);
     vacations.value = resVacations.data;
 }
@@ -162,6 +233,8 @@ const showModal = ref(false);
 const vistId = ref() as any
 
 function onEventClick(event: any) {
+    hoverEvent.value = null
+    hoverPosition.value = null
     if (event.type === 'visit') {
         vistId.value = event.id;
         showModal.value = !showModal.value;
@@ -204,12 +277,15 @@ const eventsForWeek = computed(() => {
                 start_time: v.start_time,
                 end_time: v.end_time,
                 label: `${v.user_name.charAt(0)}. ${v.user_surname}`,
+                name: `${v.user_name} ${v.user_surname}`,
+                phone: v.phone,
+                notes: v.last_user_note?.text,
                 doctor_id: v.doctor_id,
                 isPast: eventDate.isBefore(dayjs()),
             });
         }
     });
-
+    // console.log(events)
     vacations.value.forEach((v: any) => {
         const eventDate = dayjs(`${v.start_date} ${v.end_time}`);
         if (eventDate.isBetween(start, end, 'day', '[]')) {
@@ -436,3 +512,23 @@ watch(centerDay, (val) => {
     }
 })
 </script>
+
+<style scoped>
+.event-tooltip {
+    background: #333333d2;
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 6px;
+    white-space: pre-line;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    font-size: 15px;
+    pointer-events: none;
+    height: 220px;
+    position: absolute;
+    width: 300px;
+    line-height: 1.4;
+    display: flex;
+    flex-direction: column;
+
+}
+</style>
