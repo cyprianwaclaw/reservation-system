@@ -1,20 +1,20 @@
 <template>
     <div class="flex w-full gap-[50px] h-full cursor-default" v-if="visitData?.user">
         <div class="w-full relative">
-            <p class="primary-color font-semibold text-[13px]">{{ visitData.user.type ? visitData.user.type  : 'Zapisany przez panel' }}</p>
+            <p class="primary-color font-semibold text-[13px]">{{ visitData.user.type ? visitData.user.type : 'Zapisanyprzez panel' }}</p>
             <div class="flex place-items-center gap-[14px]">
                 <p class="text-[26px] font-bold">{{ visitData.user.name }} {{ visitData.user.surname }}</p>
             </div>
             <div class="mt-[6px] gap-[4px] flex flex-col">
                 <div class="flex place-items-center gap-[8px]">
                     <p class="text-[#bababa] text-[15px]">{{ visitData.user.email }}</p>
-                    <span class="dot"/>
+                    <span class="dot" />
                     <p class="text-[#bababa] text-[15px]">{{ visitData.user.phone }}</p>
                 </div>
                 <p class="text-[#bababa] text-[15px] -mt-[3px]">{{ visitData.user.age }}</p>
             </div>
             <p class="text-[15px] font-semibold  primary-color  mt-[24px]">Usługa: <span
-                    class="font-medium text-black-own">{{visitData.current_visit.type}}</span></p>
+                    class="font-medium text-black-own">{{ visitData.current_visit.type }}</span></p>
             <div class="w-[270px] bg-[#31a9ce29] rounded-xl p-4 mt-[10px]">
                 <div class="flex place-items-center gap-[8px]">
                     <Icon name="ph:clock" size="54" class="primary-color" />
@@ -32,7 +32,7 @@
                 <p class="text-[16px] font-semibold mb-[8px] primary-color ">O pacjencie</p>
                 <div class="max-h-[111px] overflow-y-auto pr-[10px]">
                     <p class="text-[16px]">
-  {{ visitData.user.description }}
+                        {{ visitData.user.description }}
                     </p>
                 </div>
             </div>
@@ -143,7 +143,7 @@ const openChangeDate = async () => {
     newDoctor.value = null
     newTime.value = ''
     isChangeDate.value = true
-    const res = await axiosInstance.get('/schedule/available-days')
+    const res = await axiosInstance.get('/available-days')
     schedule.value = res.data
 }
 
@@ -270,11 +270,12 @@ const dateOptions = computed(() =>
     width: 100%;
     height: 100vh;
 }
+
 .dot {
-  display: inline-block;
-  width: 4px;
-  height: 4px;
-  background-color: #bababa;
-  border-radius: 50%;
+    display: inline-block;
+    width: 4px;
+    height: 4px;
+    background-color: #bababa;
+    border-radius: 50%;
 }
 </style>

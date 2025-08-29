@@ -13,9 +13,9 @@
             </div>
             <p class="text-white font-semibold">{{ hoverEvent.name }}</p>
             <p class="text-white text-[13px]  mt-[2px]">{{ hoverEvent.phone }}</p>
-                <p class="text-white font-semibold text-[13px] mt-[12px]">Notatka</p>
+            <p class="text-white font-semibold text-[13px] mt-[12px]">Notatka</p>
             <p class="text-white">umówiony na analizę bol biodra</p>
-                <p class="text-white font-semibold text-[13px]  mt-[12px]">Ostatnia wizyta</p>
+            <p class="text-white font-semibold text-[13px]  mt-[12px]">Ostatnia wizyta</p>
             <p class="text-white">{{ hoverEvent?.notes }}</p>
         </div>
         <h1 class="font-semibold text-[32px]">Kalendarz z wizytami</h1>
@@ -81,7 +81,7 @@
                         </template>
                     </template>
                 </div>
-                <div v-if="currentTime < '21'|| currentTime>'7'">                
+                <div v-if="currentTime < '21' || currentTime > '7'">
                     <div v-if="currentTimeLinePosition >= 0" class="current-time-overlay" :style="{
                         top: currentTimeLinePosition + 'px',
                         left: (weekDays.findIndex((d) => d.date === todayDate) * doctors.length * columnWidth) + 'px',
@@ -91,8 +91,8 @@
                         position: 'absolute',
                         zIndex: 21,
                     }">
-                    <div class="current-time-box">{{ currentTime }}</div>
-                </div>
+                        <div class="current-time-box">{{ currentTime }}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -152,14 +152,12 @@ function onEventHover(ev: MouseEvent, event: any) {
     let showLeft = false;
     let showAbove = false;
 
-    // Jeśli tooltip nie mieści się po prawej stronie ekranu, pokaż go po lewej stronie eventu
     if (window.innerWidth < x + tooltipWidth) {
         x = rect.left - tooltipWidth - margin + window.scrollX;
         showLeft = true;
     }
-    // Jeśli tooltip nie mieści się na dole ekranu, pokaż go obok eventu, lekko poniżej górnej krawędzi eventu
     if (window.innerHeight < y + tooltipHeight) {
-        y = rect.top - 182 + window.scrollY; // 10px poniżej górnej krawędzi eventu
+        y = rect.top - 182 + window.scrollY; 
         showAbove = true;
     }
     hoverPosition.value = { x, y };
@@ -177,7 +175,7 @@ watch(isModalOpen, async (newValue: any) => {
         await fetchData()
     }
 })
-// Usunięto duplikaty tooltipa
+
 
 const doctors = [
     { id: 1, name: 'Michał' },
@@ -285,7 +283,7 @@ const eventsForWeek = computed(() => {
             });
         }
     });
-    // console.log(events)
+    
     vacations.value.forEach((v: any) => {
         const eventDate = dayjs(`${v.start_date} ${v.end_time}`);
         if (eventDate.isBetween(start, end, 'day', '[]')) {

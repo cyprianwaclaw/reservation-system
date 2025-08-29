@@ -1,8 +1,16 @@
 <template>
-    <div class="w-full">
-        <input type="text" :class="error ? 'base-input-error' : 'base-input'" :placeholder="placeholder"
-            :disabled="disabled" v-model="localValue" @input="onInput" />
-        <p v-if="error" class="text-[#f43737] text-[13px] mt-1">{{ error }}</p>
+    <div class="w-full relative">
+        <div v-if="type === 'password'"
+            @click="passwordType == 'password' ? passwordType = 'text' : passwordType = 'password'"
+            class="absolute right-4 top-3 cursor-pointer password-icon">
+            <Icon name="ph:eye" size="28" v-if="passwordType == 'password'" />
+            <Icon name="ph:eye-slash" size="28" v-else />
+        </div>
+        <input :type="passwordType" :class="[
+            error ? 'base-input-error' : 'base-input',
+            type == 'password' ? 'own-padding' : ''
+        ]" :placeholder="placeholder" :disabled="disabled" v-model="localValue" @input="onInput" />
+        <p v-if="error" class="text-[#f43737] text-[13px]">{{ error }}</p>
     </div>
 </template>
 
@@ -10,15 +18,17 @@
 const props = defineProps<{
     modelValue: any;
     placeholder?: string;
+    type?: string;
     name: string;
     disabled?: boolean;
 }>()
 
 const emit = defineEmits(["update:modelValue"]);
-const localValue = ref(props.modelValue ?? "");
-
 const { getError } = useErrors();
+
+const localValue = ref(props.modelValue ?? "");
 const error = computed(() => getError(props.name));
+const passwordType = ref(props.type === "password" ? "password" : "text");
 
 watch(() => props.modelValue, (val) => {
     localValue.value = val ?? "";
@@ -35,8 +45,13 @@ const onInput = (e: Event) => {
     localValue.value = input.value;
     emit("update:modelValue", input.value);
 };
+
 </script>
 <style scoped>
+.own-padding {
+    padding-right: 50px !important;
+}
+
 .base-input {
     width: 100%;
     border-radius: 10px;
@@ -74,5 +89,14 @@ const onInput = (e: Event) => {
     border: 2px solid #e0e0e0;
     cursor: not-allowed;
     color: #a1a1a1;
+}
+
+.password-icon {
+    cursor: pointer;
+    color: rgb(181, 181, 181);
+    transition: all 0.2s;
+}
+.password-icon:hover {
+    color: rgb(133, 133, 133);
 }
 </style>

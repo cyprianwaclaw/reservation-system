@@ -110,7 +110,7 @@ watch(allDay, async (val) => {
 
 onMounted(async () => {
     try {
-        const res = await axiosInstance.get('/schedule/available-days');
+        const res = await axiosInstance.get('/available-days');
         schedule.value = res.data;
     } catch (err) {
         console.error(err);
@@ -151,7 +151,7 @@ function clearInputs() {
     newDoctor.value = ''
     newDate.value = ''
     allDay.value = false,
-    timeStart.value = ''
+        timeStart.value = ''
     timeEnd.value = ''
 }
 

@@ -228,7 +228,7 @@ async function loadAvailableDays() {
         const today = new Date()
         const daysAhead = 15
 
-        const res = await axiosInstance.get('/schedule/available-days', {
+        const res = await axiosInstance.get('/available-days', {
             params: {
                 start_date: today.toISOString().split('T')[0],
                 days_ahead: daysAhead,
@@ -319,7 +319,7 @@ async function book() {
     if (!form.value.name || !form.value.surname || !form.value.phone || !form.value.email || !isChecked.value) return
 
     try {
-        await axiosInstance.post('/schedule/reserve', {
+        await axiosInstance.post('/reserve', {
             doctor_id: selectedPerson.value,
             name: form.value.name,
             surname: form.value.surname,

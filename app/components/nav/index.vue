@@ -1,7 +1,8 @@
 <template>
     <Modal :component="modalName" :modalActive="showModal" @close="handleModal('allPatient')" />
-    <div class="header flex w-full justify-between place-items-center px-[28px] cursor-default" ref="root"
-        :class="router.currentRoute.value?.name === 'index' ? 'sticky top-0 z-50 bg-white' : ''" v-if="!isLoading">
+    <div v-if="!isLoading && router.currentRoute.value?.name !== 'logowanie'"
+        class="header flex w-full justify-between place-items-center px-[28px] cursor-default" ref="root"
+        :class="router.currentRoute.value?.name === 'index' ? 'sticky top-0 z-50 bg-white' : ''">
         <img class="logo" src="@/assets/images/logo.png" />
         <div class="flex gap-[6px]" v-if="router.currentRoute.value?.name !== 'index'">
             <div class="flex place-items-center gap-[11px] button-action-users select-none"
