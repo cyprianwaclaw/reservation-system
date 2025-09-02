@@ -39,7 +39,7 @@
                     Wybierz dogodny dla siebie termin z kalendarza poniżej <br>i zarezerwuj wizytę online.
                     To szybkie i wygodne, wystarczy kilka kliknięć
                 </p>
-
+                <!-- {{  }} -->
                 <!-- Kalendarz -->
                 <div class="w-[370px] border-calendar mt-[44px] p-[25px]">
                     <!-- <div class="mb-2 text-sm text-gray-500">Dostępnych dni: {{ availableDays.length }}</div> -->
@@ -144,12 +144,14 @@
 </template>
 
 <script setup lang="ts">
-// Przechowuje ID osoby, nad którą jest myszka
 const hoveredPerson = ref<number | null>(null)
 const axiosInstance = useNuxtApp().$axiosInstance as any
 const { setErrors } = useErrors()
 
-// Domyślna data: dziś + 14 dni
+const emit = defineEmits<{ (e: 'isLoading', value: boolean): void }>()
+
+const isLoading = ref(true)
+
 const today = new Date()
 const defaultDate = new Date(today)
 defaultDate.setDate(today.getDate() + 15)
@@ -186,16 +188,16 @@ const todayDateStr = formatLocalDate(today)
 const startYear = today.getFullYear()
 const startMonth = today.getMonth()
 
-const maxMonthsAhead = 1
+// const maxMonthsAhead = 1
 
 const selectedDate = ref<string | null>(defaultDateStr)
 const selectedPerson = ref<number | null>(null)
 const selectedTime = ref<string | null>(null)
-const confirmed = ref<null | { date: string | any; doctor: string | any; hour: string | any, name: string | any }>(null)
 const availableDays = ref<AvailableDay[]>([])
 
 const form = ref({ name: '', surname: '', phone: '', email: '', wiek: '', description: '' })
 const isChecked = ref(false)
+const confirmed = ref<null | { date: string | any; doctor: string | any; hour: string | any, name: string | any }>(null)
 const isNonConfirmed = ref(true)
 const isConfirmed = ref(false)
 const visitType = ref()
@@ -246,6 +248,7 @@ async function loadAvailableDays() {
                 free_slots: doc.free_slots.filter((slot: string) => !blockedHours.includes(slot)),
             })),
         }))
+         emit('isLoading', false)
     } catch (error) {
         console.error('Błąd ładowania dostępnych dni:', error)
     }

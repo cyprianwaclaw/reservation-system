@@ -92,7 +92,7 @@
                             <div class="w-full mt-[34px]">
                                 <p class="text-[18px] font-semibold mb-[13px] primary-color">Poprzednie wizyty</p>
                                 <div class="max-h-[300px] overflow-y-auto border-scroll-container"
-                                    v-if="singleUser.visits.length > 0">
+                                    v-if="singleUser?.visits?.length > 0">
                                     <div v-for="(single, index) in  singleUser?.visits" :key="index"
                                         class="w-full py-[18px] px-[18px] rounded-xl bg-[#f0f0f097]"
                                         :class="index === 0 ? 'mt-[0px]' : 'mt-[10px]'">

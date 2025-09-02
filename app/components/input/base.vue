@@ -34,18 +34,69 @@ watch(() => props.modelValue, (val) => {
     localValue.value = val ?? "";
 });
 
+// const onInput = (e: Event) => {
+//     const input = e.target as HTMLInputElement;
+//     if (props.name === "phone") {
+//         input.value = input.value.replace(/[^0-9]/g, "").slice(0, 9);
+//     }
+//     if (props.name === "wiek") {
+//         input.value = input.value.replace(/[^1-9]/g, "").slice(0, 2);
+//     }
+//     localValue.value = input.value;
+//     emit("update:modelValue", input.value);
+// };
+
 const onInput = (e: Event) => {
     const input = e.target as HTMLInputElement;
-    if (props.name === "phone") {
-        input.value = input.value.replace(/[^0-9]/g, "").slice(0, 9);
-    }
-    if (props.name === "wiek") {
-        input.value = input.value.replace(/[^1-9]/g, "").slice(0, 2);
-    }
-    localValue.value = input.value;
-    emit("update:modelValue", input.value);
-};
+    let value = input.value;
 
+    if (props.name === "phone") {
+        value = value.replace(/[^0-9]/g, "").slice(0, 9);
+    }
+
+    if (props.name === "wiek") {
+        value = value.replace(/[^0-9]/g, "").slice(0, 2);
+    }
+
+    if (props.name === "name" || props.name === "surname") {
+        value = value.replace(/[^a-zA-ZąćęłńóśżźĄĆĘŁŃÓŚŻŹ]/g, "");
+    }
+
+    if (props.name === "city") {
+        value = value.replace(/[^a-zA-ZąćęłńóśżźĄĆĘŁŃÓŚŻŹ\s]/g, "");
+    }
+
+    if (props.name === "city_code") {
+        // wyciągamy tylko cyfry, max 5
+        let digits = value.replace(/[^0-9]/g, "").slice(0, 5);
+
+        if (digits.length > 2) {
+            value = digits.slice(0, 2) + "-" + digits.slice(2);
+        } else {
+            value = digits;
+        }
+
+        // pilnujemy max długości "XX-XXX"
+        value = value.slice(0, 6);
+
+        // jeśli właśnie wpisano drugą cyfrę → wstawiamy "-" i przeskakujemy kursor
+        if (digits.length === 2 && !input.value.includes("-")) {
+            value = digits + "-";
+            // ustaw kursor za "-"
+            setTimeout(() => {
+                input.setSelectionRange(3, 3);
+            });
+        }
+    }
+
+    if (props.name === "pesel") {
+        value = value.replace(/[^0-9]/g, "").slice(0, 11);
+    }
+
+    input.value = value;
+    localValue.value = value;
+    emit("update:modelValue", value);
+};
 </script>
 <style scoped>
 .own-padding {

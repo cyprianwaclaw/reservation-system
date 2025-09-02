@@ -1,7 +1,7 @@
 <template>
     <Modal component="visit" :modalActive="showModal" :data="vistId" @close="handleModalClose" />
     <div v-if="isLoading">
-        <LoadingSpinner :isLoading="true" />
+        <LoadingSpinner :isLoading="true" class="-mt-[120px]" />
     </div>
     <div class="flex place-items-center w-full justify-between px-[30px] pb-[24px] mt-[60px]"
         :class="isLoading == true ? 'window-loading' : ''">
@@ -60,11 +60,18 @@
                     left: timeColWidth + 'px',
                     height: hours.length * rowHeight + 'px',
                 }">
-                    <div v-for="e in eventsForWeek" :key="e.id + '-' + e.type" class="event"
+                    <!-- <div v-for="e in eventsForWeek" :key="e.id + '-' + e.type" class="event"
                         :class="[e.type, e.isPast ? 'event-past' : 'event-future']" :style="getEventPosition(e)"
                         :title="eLabel(e)" @click="onEventClick(e)" @mousemove="onEventHover($event, e)"
-                        @mouseleave="clearHover">
-                        {{ eLabel(e) }}
+                        @mouseleave="clearHover"> -->
+
+                    <div v-for="e in eventsForWeek" :key="e.id + '-' + e.type" class="event"
+                        :class="[e.type, e.isPast ? 'event-past' : 'event-future', 'doctor-' + e.doctor_id]"
+                        :style="getEventPosition(e)" :title="eLabel(e)" @click="onEventClick(e)"
+                        @mousemove="onEventHover($event, e)" @mouseleave="clearHover">
+                        <p :class="'text-' + e.user_type">
+                            {{ eLabel(e) }}
+                        </p>
                     </div>
                 </div>
                 <div class="current-time-overlay" :style="{ top: currentTimeLinePosition + 'px' }"
@@ -121,6 +128,7 @@ const hoverEvent = ref<any>(null)
 const hoverPosition = ref<{ x: number, y: number } | null>(null)
 const tooltipAbove = ref(false)
 const tooltipLeft = ref(false)
+
 const tooltipStyle = computed(() => {
     if (!hoverPosition.value) return {};
     const tooltipWidth = 260;
@@ -157,7 +165,7 @@ function onEventHover(ev: MouseEvent, event: any) {
         showLeft = true;
     }
     if (window.innerHeight < y + tooltipHeight) {
-        y = rect.top - 182 + window.scrollY; 
+        y = rect.top - 182 + window.scrollY;
         showAbove = true;
     }
     hoverPosition.value = { x, y };
@@ -276,6 +284,7 @@ const eventsForWeek = computed(() => {
                 end_time: v.end_time,
                 label: `${v.user_name.charAt(0)}. ${v.user_surname}`,
                 name: `${v.user_name} ${v.user_surname}`,
+                user_type: v.user_type,
                 phone: v.phone,
                 notes: v.last_user_note?.text,
                 doctor_id: v.doctor_id,
@@ -283,7 +292,7 @@ const eventsForWeek = computed(() => {
             });
         }
     });
-    
+
     vacations.value.forEach((v: any) => {
         const eventDate = dayjs(`${v.start_date} ${v.end_time}`);
         if (eventDate.isBetween(start, end, 'day', '[]')) {
@@ -512,6 +521,51 @@ watch(centerDay, (val) => {
 </script>
 
 <style scoped>
+/* Michał */
+.event.doctor-1 {
+    background-color: #27a4709e !important;
+    /* czerwony */
+}
+
+/* Grzegorz*/
+.event.doctor-2 {
+    background-color: #bf6b118f !important;
+    /* niebieski */
+}
+
+/* Ola */
+.event.doctor-3 {
+    background-color: #9f1edb76 !important;
+    /* zielony */
+}
+
+/* Asia */
+.event.doctor-4 {
+    background-color: #f507dd6f !important;
+    /* żółty */
+}
+.text-prywatny {
+  color: #000000 !important; /* czarny */
+}
+
+.text-AWF {
+  color: #ff0000 !important; /* czerwony */
+}
+
+.text-Klub.gimnastyki{
+  color: #0000ff !important; /* niebieski */
+}
+
+.text-Od.Grzegorza {
+  color: #ffff00 !important; /* żółty */
+}
+
+.text-Od.Asi {
+  color: #008000 !important; /* zielony */
+}
+.text-null {
+  color: #8b4513 !important; /* brązowy */
+}
 .event-tooltip {
     background: #333333d2;
     color: #fff;

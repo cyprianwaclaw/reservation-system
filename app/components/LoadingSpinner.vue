@@ -17,11 +17,11 @@ const props = defineProps<{
 <style scoped>
 .spinner-overlay {
     position: fixed;
-    top: 0;
+    top: 120px;
     left: 0;
     width: 100vw;
     height: 100vh;
-    /* background-color: rgba(255, 255, 255, 0.7); */
+    background-color: rgba(255, 255, 255, 0.7);
     display: flex;
     justify-content: center;
     align-items: center;

@@ -73,15 +73,18 @@ const schedule = ref<any[]>([]);
 
 const visitType = ref()
 
-const visitTypeOptions = ref([
-    { value: 'Zabiegi', label: 'Zabiegi' },
-    { value: 'Fizjoterapia', label: 'Fizjoterapia' },
-    { value: 'Rehabilitacja', label: 'Rehabilitacja' },
-    { value: 'Masaż', label: 'Masaż' },
-    { value: 'Kinezyterapia', label: 'Kinezyterapia' },
-    { value: 'Elektroterapia', label: 'Elektroterapia' },
-    { value: 'Terapia manualna', label: 'Terapia manualna' }
+const visitTypeOptions = ref<any[]>([
+    { value: "Wkładki do butów", label: "Wkładki do butów - 400 zł" },
+    { value: "Analiza techniki biegu", label: "Analiza techniki biegu - 350 zł" },
+    { value: "Terapia manulna", label: "Terapia manulna - 180 zł" },
+    { value: "Terapia manulna + TECAR", label: "Terapia manulna + TECAR - 180 zł" },
+    { value: "Terapia manulna + usg", label: "Terapia manulna + usg - 200 zł" },
+    { value: "Fala uderzeniowa + terapia manulna", label: "Fala uderzeniowa + terapia manulna - 180 zł" },
+    { value: "Wywiad+ badanie+ USG", label: "Wywiad+ badanie+ USG - 250 zł" },
+    { value: "Wywiad + elementy badanie funkcjonalne/Analiza techniki biegu", label: "Wywiad + elementy badanie funkcjonalne/Analiza techniki biegu - 250 zł" },
+    { value: "Przeskórna elektroliza EPTE+USG", label: "Przeskórna elektroliza EPTE+USG - 250 zł" }
 ])
+
 
 onMounted(async () => {
     const res = await axiosInstance.get('/available-days');

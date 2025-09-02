@@ -90,7 +90,6 @@ p {
   display: inline-block;
   font-weight: 600;
   color: #f43737;
-  /* 	width: 270px; */
   background: white;
   text-align: center;
   white-space: nowrap;
@@ -98,9 +97,7 @@ p {
   -moz-user-select: none;
   user-select: none;
   padding: 9px 20px;
-
   font-size: 16px;
-  /* border: 1px solid #f43737; */
   border-radius: 99px;
   transition: all 0.3s;
   font-family: 'Public Sans', sans-serif;
@@ -491,4 +488,23 @@ p {
   border: solid white;
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
+}
+
+
+/* index hero-photo */
+.main-photo {
+  position: sticky;
+  top: 20%;
+  height: 70vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-photo {
+  border-radius: 10px !important;
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
 }

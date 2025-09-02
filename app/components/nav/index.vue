@@ -2,9 +2,9 @@
     <Modal :component="modalName" :modalActive="showModal" @close="handleModal('allPatient')" />
     <div v-if="!isLoading && router.currentRoute.value?.name !== 'logowanie'"
         class="header flex w-full justify-between place-items-center px-[28px] cursor-default" ref="root"
-        :class="router.currentRoute.value?.name === 'index' ? 'sticky top-0 z-50 bg-white' : ''">
+        :class="router.currentRoute.value?.name !== 'api-week' ? 'sticky top-0 z-50 bg-white' : ''">
         <img class="logo" src="@/assets/images/logo.png" />
-        <div class="flex gap-[6px]" v-if="router.currentRoute.value?.name !== 'index'">
+        <div class="flex gap-[6px]" v-if="router.currentRoute.value?.name === 'api-week'">
             <div class="flex place-items-center gap-[11px] button-action-users select-none"
                 @click="handleModal('allPatient')">
                 <Icon name="ph:users-bold" size="28" class="primary-color" />
@@ -29,12 +29,12 @@ const handleModal = (name: string) => {
     showModal.value = !showModal.value;
 };
 onMounted(() => {
-    if (router.currentRoute.value?.name == 'index') {
-        isLoading.value = false
-    } else {
+    if (router.currentRoute.value?.name === 'api-week') {
         setTimeout(() => {
             isLoading.value = false
         }, 1100)
+    } else {
+        isLoading.value = false
     }
 })
 </script>
