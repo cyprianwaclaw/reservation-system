@@ -3,7 +3,7 @@
         <div class="form-container">
             <div v-if="isLogin">
                 <p class="text-[36px] font-semibold mb-[16px]">Logowanie</p>
-                <div v-if="errors.message" class="text-red-600 flex items-center gap-2 mb-4">
+                <div v-if="errors.message" class="text-red-600 flex items-center gap-[4px] mb-4">
                     <Icon name="ph:warning-circle" size="25" />
                     <p>{{ errors.message }}</p>
                 </div>

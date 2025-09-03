@@ -13,8 +13,12 @@
             <Add />
         </div>
         <div v-else class="text-[16px] font-medium flex gap-[21px]">
-            <NuxtLink to="/" class="hover:text-gray-500">Fizjoterapia Kaczmarek</NuxtLink>
-            <NuxtLink to="/" class="hover:text-gray-500">Centrum Zdrowia Biegacza</NuxtLink>
+    <NuxtLink to="https://fizjoterapia-kaczmarek.pl/" target="_blank" rel="noopener noreferrer" class="hover:text-gray-500">
+      Fizjoterapia Kaczmarek
+    </NuxtLink>
+    <NuxtLink to="https://centrumzdrowiabiegacza.pl/" target="_blank" rel="noopener noreferrer" class="hover:text-gray-500">
+      Centrum Zdrowia Biegacza
+    </NuxtLink>
         </div>
     </div>
 </template>

@@ -14,22 +14,29 @@
                         <InputBase v-model="age" name="wiek" placeholder="Wiek" />
                         <InputBase v-model="pesel" name="pesel" placeholder="PESEL" />
                     </div>
+                    <p class="text-[16px] font-semibold primary-color -mb-[2px] mt-[24px] ">Rodzaj pacjenta</p>
+                    <InputSelect v-model="patientType" :options="patientTypeOptions" placeholder="Wybierz rodzaj" />
                     <p class="text-[16px] font-semibold primary-color -mb-[2px] mt-[24px]">Zmieszkanie</p>
                     <div class="flex gap-[10px]">
-                        <div class="w-[160px]">
+                        <div class="w-[140px]">
                             <InputBase v-model="city_code" name="city_code" placeholder="Kod" />
                         </div>
-                        <InputBase v-model="street" name="street" placeholder="Nazwa ulicy oraz numer" />
+                        <InputBase v-model="city" name="city" placeholder="Miejscowość" />
                     </div>
+                    <InputBase v-model="street" name="street" placeholder="Nazwa ulicy oraz numer" />
 
-                    <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Dane kontaktowe</p>
+                    <!-- <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Dane kontaktowe</p>
                     <InputBase v-model="email" name="email" placeholder="E-mail" />
-                    <InputBase v-model="phone" name="phone" placeholder="Telefon" />
+                    <InputBase v-model="phone" name="phone" placeholder="Telefon" /> -->
+
                 </div>
             </div>
             <div class="w-full flex flex-col gap-[10px]">
-                <p class="text-[16px] font-semibold primary-color -mb-[2px]">Pochodzenie</p>
-                <InputSelect v-model="patientType" :options="patientTypeOptions" placeholder="Wybierz rodzaj" />
+                <p class="text-[16px] font-semibold primary-color -mb-[2px]">Dane kontaktowe</p>
+                <InputBase v-model="email" name="email" placeholder="E-mail" />
+                <InputBase v-model="phone" name="phone" placeholder="Telefon" />
+                <!-- <p class="text-[16px] font-semibold primary-color -mb-[2px]">Rodzaj pacjenta</p>
+                <InputSelect v-model="patientType" :options="patientTypeOptions" placeholder="Wybierz rodzaj" /> -->
                 <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Napisz coś o pacjencie</p>
                 <textarea v-model="description" placeholder="O pacjencie..."
                     class="add-description min-h-[170px]"></textarea>
@@ -61,6 +68,7 @@ const phone = ref("");
 const age = ref("");
 const street = ref("");
 const city_code = ref("");
+const city = ref("");
 const pesel = ref("");
 const patientType = ref('')
 const description = ref("")

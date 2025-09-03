@@ -6,10 +6,13 @@
                 <p class="text-[26px] font-bold">{{ visitData.user.name }} {{ visitData.user.surname }}</p>
             </div>
             <div class="mt-[6px] gap-[4px] flex flex-col">
-                <div class="flex place-items-center gap-[8px]">
+                <div class="flex place-items-center">
                     <p class="text-[#bababa] text-[15px]">{{ visitData.user.email }}</p>
-                    <span class="dot" />
-                    <p class="text-[#bababa] text-[15px]">{{ visitData.user.phone }}</p>
+                    <span v-if="visitData.user.email" class="dot mx-[8px]" />
+                    <p class="text-[#bababa] text-[15px]">
+                        +48 {{ visitData.user.phone ? visitData.user.phone.replace(/\D/g, '').match(/.{1,3}/g)?.join(' ') :
+                            '' }}
+                    </p>
                 </div>
                 <p class="text-[#bababa] text-[15px] -mt-[3px]">{{ visitData.user.age }}</p>
             </div>
@@ -34,6 +37,9 @@
                     <p class="text-[16px]">
                         {{ visitData.user.description }}
                     </p>
+<div v-if="!visitData.user.description" class="mt-[6px]">
+                        <p class="text-[#8b8b8b6a] font-bold text-[22px]">Brak opisu</p>
+                    </div>
                 </div>
             </div>
             <!-- Blok potwierdzenia odwołania wizyty -->
@@ -70,10 +76,10 @@
                 <button class="remove-button" @click="isDelete = true">Odwołaj wizytę</button>
             </div>
         </div>
-        <div class="w-full">
+        <div class="w-full relative">
             <div class="w-full mt-[14px]">
                 <p class="text-[16px] font-semibold mb-[13px] primary-color ">Poprzednie wizyty</p>
-                <div class="max-h-[300px] overflow-y-auto rounded-xl" v-if="visitData.notes.length > 0">
+                <div class="max-h-[180px] overflow-y-auto rounded-xl" v-if="visitData?.notes?.length > 0">
                     <div v-for="(single, index) in visitData.notes" :key="index"
                         class="w-full py-[18px] px-[18px] rounded-xl bg-[#f0f0f097]"
                         :class="index === 0 ? 'mt-[0px]' : 'mt-[10px]'">
@@ -82,17 +88,21 @@
                     </div>
                 </div>
                 <div v-else>
-                    <p class="text-[#8b8b8b6a] font-bold text-[22px]">Brak wizyt</p>
+                    <p class="text-[#8b8b8b6a] font-bold text-[22px] mb-[30px]">Brak wizyt</p>
                 </div>
             </div>
-            <div>
-                <div class="relative mt-[18px]">
-                    <textarea v-model="newNote" placeholder="Dodaj opis..." class="add-description"></textarea>
-                    <button class="primary-button-ghost absolute bottom-[23px] right-[17px]" @click="addNote()">Dodaj
-                        notatkę</button>
+            <div class="relative mt-[14px]">
+                <textarea v-model="newNote" placeholder="Dodaj sprawozdanie..." class="add-description"></textarea>
+                <button class="primary-button-ghost absolute bottom-[23px] right-[17px]" @click="addNote()">Dodaj</button>
+            </div>
+            <div class="absolute bottom-0 right-0 w-full">
+                <div class="relative mt-[14px]">
+                    <textarea class="own-note" v-model="fastNote" placeholder="Notatka..."></textarea>
+                    <button class="primary-button-ghost absolute bottom-[20px] right-[20px]" @click="addFastNote()">Ok</button>
                 </div>
             </div>
         </div>
+
     </div>
 </template>
 
@@ -113,13 +123,25 @@ const newTime = ref('')
 const schedule = ref([]) as any
 const visitData = ref([]) as any
 const newNote = ref<string>('')
+const fastNote = ref<string>('')
 const isDelete = ref<boolean>(false)
 const isChangeDate = ref<boolean>(false)
 const showModal = ref(false);
+const visitDuration = ref<number | null>(null)
 
 onMounted(async () => {
     const res = await axiosInstance.get(`/schedule/visits/${props.vistId}`)
     visitData.value = res.data
+    fastNote.value = visitData.value?.fast_note.text || ''
+    if (visitData.value?.current_visit?.start_time && visitData.value?.current_visit?.end_time) {
+        const [startH, startM] = visitData.value.current_visit.start_time.split(':').map(Number)
+        const [endH, endM] = visitData.value.current_visit.end_time.split(':').map(Number)
+
+        const startMinutes = startH * 60 + startM
+        const endMinutes = endH * 60 + endM
+
+        visitDuration.value = endMinutes - startMinutes
+    }
 })
 
 const addNote = async () => {
@@ -128,6 +150,17 @@ const addNote = async () => {
             'text': newNote.value
         })
         newNote.value = ''
+        const res = await axiosInstance.get(`/schedule/visits/${props.vistId}`)
+        visitData.value = res.data
+    }
+}
+
+const addFastNote = async () => {
+    if (fastNote.value.length > 3) {
+        const newFastNoteRes = await axiosInstance.post(`/visits/${props.vistId}/notes`, {
+            'text': fastNote.value,
+            "is_edit": true,
+        })
         const res = await axiosInstance.get(`/schedule/visits/${props.vistId}`)
         visitData.value = res.data
     }
@@ -164,6 +197,7 @@ const confirmChangeDate = async () => {
         date: newDate.value,
         hour: newTime.value,
         doctor_id: newDoctor.value,
+        duration: visitDuration.value
     })
     isChangeDate.value = false
     closeModal()

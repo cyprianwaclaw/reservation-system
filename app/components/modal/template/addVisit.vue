@@ -23,7 +23,7 @@
                         </div>
                         <div class="w-full flex flex-row gap-[10px]">
                             <InputBase v-model="email" name="email" placeholder="E-mail" :disabled="!!selectPatient" />
-                            <InputBase v-model="phone" name="phone" placeholder="Numer telefonu"
+                            <InputBase v-model="phone" name="phone" placeholder="Telefon"
                                 :disabled="!!selectPatient" />
                         </div>
                         <p @click="clearPatientSelection" v-if="selectPatient"

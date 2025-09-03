@@ -6,10 +6,50 @@
             <Icon name="ph:eye" size="28" v-if="passwordType == 'password'" />
             <Icon name="ph:eye-slash" size="28" v-else />
         </div>
+
+        <!-- <div v-if="name === 'phone'" class="absolute left-3.5 top-3 select-none">
+            <div class="flex place-items-center gap-[5px]">
+                <Icon name="ph:phone" size="27" :class="[isFocused ? 'text-[#31a9ce]' : 'text-[#cacaca]']" />
+                <p class="mt-[2px] text-[17px]">+48 </p>
+            </div>
+        </div>
+        <div v-if="name === 'email'">
+            <Icon name="ph:envelope-simple" size="27" class="absolute left-3.5 top-3 select-none"
+                :class="[isFocused ? 'text-[#31a9ce]' : 'text-[#cacaca]']" />
+        </div> -->
+
+    <div v-if="name === 'phone'" class="absolute left-3.5 top-3 select-none">
+        <div class="flex place-items-center gap-[5px]">
+            <Icon 
+                name="ph:phone" 
+                size="27" 
+                :class="[
+                    error ? 'text-[#f43737]' : isFocused ? 'text-[#31a9ce]' : 'text-[#cacaca]'
+                ]" 
+            />
+            <p class="mt-[2px] text-[17px]">+48 </p>
+        </div>
+    </div>
+
+    <div v-if="name === 'email'">
+        <Icon 
+            name="ph:envelope-simple" 
+            size="27" 
+            class="absolute left-3.5 top-3 select-none"
+            :class="[
+                error ? 'text-[#f43737]' : isFocused ? 'text-[#31a9ce]' : 'text-[#cacaca]'
+            ]" 
+        />
+    </div>
+
         <input :type="passwordType" :class="[
             error ? 'base-input-error' : 'base-input',
-            type == 'password' ? 'own-padding' : ''
-        ]" :placeholder="placeholder" :disabled="disabled" v-model="localValue" @input="onInput" />
+            type == 'password' ? 'own-padding' : '',
+            name === 'email' ? 'own-padding-left' : '',
+            name === 'phone' ? 'own-padding-phone' : ''
+        ]" :placeholder="placeholder" :disabled="disabled" v-model="localValue" @input="onInput"
+            @focus="isFocused = true" @blur="isFocused = false" />
+
         <p v-if="error" class="text-[#f43737] text-[13px]">{{ error }}</p>
     </div>
 </template>
@@ -29,29 +69,35 @@ const { getError } = useErrors();
 const localValue = ref(props.modelValue ?? "");
 const error = computed(() => getError(props.name));
 const passwordType = ref(props.type === "password" ? "password" : "text");
+const isFocused = ref(false); // 🔹 do ikony telefonu
 
 watch(() => props.modelValue, (val) => {
     localValue.value = val ?? "";
 });
 
-// const onInput = (e: Event) => {
-//     const input = e.target as HTMLInputElement;
-//     if (props.name === "phone") {
-//         input.value = input.value.replace(/[^0-9]/g, "").slice(0, 9);
-//     }
-//     if (props.name === "wiek") {
-//         input.value = input.value.replace(/[^1-9]/g, "").slice(0, 2);
-//     }
-//     localValue.value = input.value;
-//     emit("update:modelValue", input.value);
-// };
+const formatPhone = (val: string) => {
+    let digits = val.replace(/[^0-9]/g, "").slice(0, 9);
+    return digits.replace(/(\d{3})(?=\d)/g, "$1 ").trim().slice(0, 11);
+};
+
+const formatCityCode = (val: string) => {
+    let digits = val.replace(/[^0-9]/g, "").slice(0, 5);
+    let formatted = digits;
+    if (digits.length > 2) {
+        formatted = digits.slice(0, 2) + "-" + digits.slice(2);
+    }
+    return formatted.slice(0, 6);
+};
 
 const onInput = (e: Event) => {
     const input = e.target as HTMLInputElement;
     let value = input.value;
 
     if (props.name === "phone") {
-        value = value.replace(/[^0-9]/g, "").slice(0, 9);
+        value = formatPhone(value);
+        setTimeout(() => {
+            input.setSelectionRange(value.length, value.length);
+        });
     }
 
     if (props.name === "wiek") {
@@ -67,22 +113,8 @@ const onInput = (e: Event) => {
     }
 
     if (props.name === "city_code") {
-        // wyciągamy tylko cyfry, max 5
-        let digits = value.replace(/[^0-9]/g, "").slice(0, 5);
-
-        if (digits.length > 2) {
-            value = digits.slice(0, 2) + "-" + digits.slice(2);
-        } else {
-            value = digits;
-        }
-
-        // pilnujemy max długości "XX-XXX"
-        value = value.slice(0, 6);
-
-        // jeśli właśnie wpisano drugą cyfrę → wstawiamy "-" i przeskakujemy kursor
-        if (digits.length === 2 && !input.value.includes("-")) {
-            value = digits + "-";
-            // ustaw kursor za "-"
+        value = formatCityCode(value);
+        if (value.length === 3 && value.includes("-")) {
             setTimeout(() => {
                 input.setSelectionRange(3, 3);
             });
@@ -97,12 +129,31 @@ const onInput = (e: Event) => {
     localValue.value = value;
     emit("update:modelValue", value);
 };
+
+watch(
+    () => props.modelValue,
+    (val) => {
+        if (!val) return;
+        let formatted = val;
+        if (props.name === "phone") formatted = formatPhone(val);
+        if (props.name === "city_code") formatted = formatCityCode(val);
+        localValue.value = formatted;
+    },
+    { immediate: true }
+);
+
 </script>
 <style scoped>
 .own-padding {
     padding-right: 50px !important;
 }
 
+.own-padding-left {
+    padding-left: 48px !important;
+}
+.own-padding-phone {
+    padding-left: 79px !important;
+}
 .base-input {
     width: 100%;
     border-radius: 10px;
@@ -147,6 +198,7 @@ const onInput = (e: Event) => {
     color: rgb(181, 181, 181);
     transition: all 0.2s;
 }
+
 .password-icon:hover {
     color: rgb(133, 133, 133);
 }

@@ -43,13 +43,29 @@
                         <p class="text-[16px] font-semibold primary-color -mb-[2px]">Dane personalne</p>
                         <InputBase v-model="firstName" name="name" placeholder="Imię" />
                         <InputBase v-model="surName" name="surname" placeholder="Nazwisko" />
-                        <InputBase v-model="age" name="wiek" placeholder="Wiek" />
+                        <div class="flex w-full gap-[10px] place-items-center">
+                            <div class="flex w-full gap-[4px] place-items-center">
+                                <p class="w-[110px]">Wiek pacjenta</p>
+                                <div class="w-[78px]">
+                                    <InputBase v-model="age" name="wiek" placeholder="Wiek" />
+                                </div>
+                            </div>
+                            <InputBase v-model="pesel" name="pesel" placeholder="PESEL" />
+                        </div>
+                        <p class="text-[16px] font-semibold primary-color -mb-[2px] mt-[24px]">Zmieszkanie</p>
+                        <div class="flex gap-[10px]">
+                            <div class="w-[140px]">
+                                <InputBase v-model="city_code" name="city_code" placeholder="Kod" />
+                            </div>
+                            <InputBase v-model="city" name="city" placeholder="Miejscowość" />
+                        </div>
+                        <InputBase v-model="street" name="street" placeholder="Nazwa ulicy oraz numer" />
                         <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Dane kontaktowe</p>
                         <InputBase v-model="email" name="email" placeholder="E-mail" />
                         <InputBase v-model="phone" name="phone" placeholder="Telefon" />
                     </div>
                     <div class="w-full flex flex-col gap-[10px] mt-[24px]">
-                        <p class="text-[16px] font-semibold primary-color -mb-[2px]">Pochodzenie</p>
+                        <p class="text-[16px] font-semibold primary-color -mb-[2px]">Rodzaj pacjenta</p>
                         <InputSelect v-model="patientType" :options="patientTypeOptions" placeholder="Wybierz rodzaj" />
                         <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Napisz coś o pacjencie</p>
                         <textarea v-model="description" placeholder="O pacjencie..."
@@ -72,16 +88,32 @@
                     <Transition name="fade" mode="out-in">
                         <div v-if="singleUser" :key="singleUser.id"
                             class="max-h-[450px] overflow-y-auto border-scroll-container pb-[28px]">
-                            <p class="primary-color font-semibold text-[13px]">{{ singleUser.patient_type ? singleUser.patient_type : 'Zapisany przez panel' }}</p>
+                            <p class="primary-color font-semibold text-[13px]">{{ singleUser.patient_type ?
+                                singleUser.patient_type : 'Zapisany przez panel' }}</p>
                             <div class="flex place-items-center gap-[14px]">
                                 <p class="text-[26px] font-bold">{{ singleUser.name }} {{ singleUser.surname }}</p>
                             </div>
                             <div class="mt-[15px] gap-[5px] flex flex-col">
                                 <p class="text-gray-500 text-[16px]">{{ singleUser.email }}</p>
-                                <p class="text-gray-500 text-[16px] -mt-[2px]">{{ singleUser.phone }}</p>
+                                <p class="text-gray-500 text-[16px]">
+                                       <!-- +48 {{ singleUser.phone ? singleUser.phone.replace(/\D/g, '').match(/.{1,3}/g)?.join(' ') : '' }} -->
+                                                   +48 {{ singleUser.phone ? singleUser.phone.replace(/\D/g, '').match(/.{1,3}/g)?.join(' ') : '' }}
+                                </p>
                                 <p class="text-gray-500 text-[16px] -mt-[3px]">{{ singleUser.age }}</p>
+                                <p v-if="singleUser.pesel" class="text-gray-500 text-[16px] -mt-[3px]">PESEL: {{
+                                    singleUser.pesel }}</p>
                             </div>
-                            <div class="mt-[34px]">
+                            <div class="mt-[34px]" v-if="singleUser?.city || singleUser?.street || singleUser?.city_code">
+                                <p class="text-[18px] font-semibold mb-[8px] primary-color ">Zamieszkanie</p>
+                                <div class="pr-[18px]">
+                                    <p class="text-[17px]">
+                                        {{ singleUser.city_code }}, {{ singleUser.city }}
+                                    </p>
+                                    <p class="text-[17px] mt-[3px]">{{ singleUser.street }}
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="mt-[34px]" v-if="singleUser?.description">
                                 <p class="text-[18px] font-semibold mb-[8px] primary-color ">O pacjencie</p>
                                 <div class="pr-[18px] border-scroll-container">
                                     <p class="text-[16px]">
@@ -89,10 +121,9 @@
                                     </p>
                                 </div>
                             </div>
-                            <div class="w-full mt-[34px]">
+                            <div class="w-full mt-[34px]" v-if="singleUser?.visits?.length > 0">
                                 <p class="text-[18px] font-semibold mb-[13px] primary-color">Poprzednie wizyty</p>
-                                <div class="max-h-[300px] overflow-y-auto border-scroll-container"
-                                    v-if="singleUser?.visits?.length > 0">
+                                <div class="max-h-[300px] overflow-y-auto border-scroll-container">
                                     <div v-for="(single, index) in  singleUser?.visits" :key="index"
                                         class="w-full py-[18px] px-[18px] rounded-xl bg-[#f0f0f097]"
                                         :class="index === 0 ? 'mt-[0px]' : 'mt-[10px]'">
@@ -110,9 +141,9 @@
                                         <p class="text-[17px] text-[#4f4f4f] mt-[3px]">{{ single?.text }}</p>
                                     </div>
                                 </div>
-                                <div v-else>
+                                <!-- <div v-else>
                                     <p class="text-[#8b8b8b6a] font-bold text-[20px] -mt-[3px]">Brak wizyt</p>
-                                </div>
+                                </div> -->
                             </div>
                             <div class="w-full flex items-start gap-[20px] mt-[40px]">
 
@@ -166,6 +197,10 @@ const surName = ref("");
 const email = ref("");
 const phone = ref("");
 const age = ref("");
+const street = ref("");
+const city_code = ref("");
+const city = ref("");
+const pesel = ref("");
 const patientType = ref('')
 const description = ref("")
 const isSuccess = ref()
@@ -255,8 +290,11 @@ const confirmDelete = async (id: number) => {
 
 
 const fetchSingleUser = async (id: number) => {
+    setTimeout(() => {
+        isEdit.value = false
+    }, 200);
     try {
-        const res = await axiosInstance.get(`/users/${id}`);
+        const res = await axiosInstance.get(`/all-users/${id}`);
         singleUser.value = res.data;
         isDelete.value = false
     } catch (error) {
@@ -283,6 +321,10 @@ const toggleEdit = () => {
         surName.value = singleUser.value.surname
         email.value = singleUser.value.email
         phone.value = singleUser.value.phone
+        pesel.value = singleUser.value.pesel
+        street.value = singleUser.value.street
+        city_code.value = singleUser.value.city_code
+        city.value = singleUser.value.city
         age.value = String(singleUser.value.age).split(' ')[0] as any
         patientType.value = singleUser.value.patient_type
         description.value = singleUser.value?.description
@@ -304,6 +346,12 @@ const updatePatient = async () => {
     if (age.value !== String(singleUser.value.age).split(' ')[0]) data.wiek = age.value;
     if (patientType.value !== singleUser.value.patient_type) data.rodzaj_pacjenta = patientType.value;
 
+    // 🔹 Dodane pola
+    if (street.value !== singleUser.value.street) data.street = street.value;
+    if (city_code.value !== singleUser.value.city_code) data.city_code = city_code.value;
+    if (city.value !== singleUser.value.city) data.city = city.value;
+    if (pesel.value !== singleUser.value.pesel) data.pesel = pesel.value;
+
     // Jeżeli nie ma żadnych zmian, nic nie wysyłamy
     if (Object.keys(data).length === 0) return;
 
@@ -315,7 +363,7 @@ const updatePatient = async () => {
 
         setTimeout(() => {
             isSuccess.value = false;
-            toggleEdit();
+            isEdit.value = false
         }, 1200);
 
         // Odświeżamy pełną listę pacjentów
@@ -336,6 +384,7 @@ const updatePatient = async () => {
         }
     }
 };
+
 
 onMounted(() => {
     fetchPatient()

@@ -107,6 +107,11 @@
                     <!-- Formularz rezerwacji -->
                     <div v-if="selectedDate && selectedPerson && selectedTime" class="booking-form">
                         <h3>Twoje dane</h3>
+                        <div class="flex place-items-center gap-[3px] text-[#4658e3] -mt-[6px] mb-[18px]">
+                            <Icon name="ph:warning-circle" size="23"/>
+                            <p class="text-[14px] ">Wymagamy tylko imienia, nazwiska oraz numeru telefonu</p>                            
+                        </div>
+
                         <form @submit.prevent="book">
                             <div class="w-full flex flex-col gap-[10px]">
                                 <div class="w-full flex flex-row gap-[10px]">
@@ -318,8 +323,8 @@ function selectTime(time: string) {
 
 // Rezerwacja
 async function book() {
-    if (!selectedDate.value || !selectedPerson.value || !selectedTime.value) return
-    if (!form.value.name || !form.value.surname || !form.value.phone || !form.value.email || !isChecked.value) return
+    // if (!selectedDate.value || !selectedPerson.value || !selectedTime.value) return
+    // if (!form.value.name || !form.value.surname || !form.value.phone || !form.value.email || !isChecked.value) return
 
     try {
         await axiosInstance.post('/reserve', {

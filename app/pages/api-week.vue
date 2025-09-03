@@ -11,10 +11,15 @@
             <div class="event-tooltip-arrow"
                 :class="[tooltipAbove ? 'event-tooltip-arrow--top' : '', tooltipLeft ? 'event-tooltip-arrow--left' : '']">
             </div>
-            <p class="text-white font-semibold">{{ hoverEvent.name }}</p>
-            <p class="text-white text-[13px]  mt-[2px]">{{ hoverEvent.phone }}</p>
+            <div class="flex w-full justify-between">
+                <div>
+                    <p class="text-white font-semibold">{{ hoverEvent.name }}</p>
+                    <p class="text-white text-[13px]  mt-[2px]">{{ hoverEvent.phone }}</p>
+                </div>
+                <p class="text-white font-semibold">{{ hoverEvent.time }}</p>
+            </div>
             <p class="text-white font-semibold text-[13px] mt-[12px]">Notatka</p>
-            <p class="text-white">umówiony na analizę bol biodra</p>
+            <p class="text-white">{{ hoverEvent?.fast_note }}</p>
             <p class="text-white font-semibold text-[13px]  mt-[12px]">Ostatnia wizyta</p>
             <p class="text-white">{{ hoverEvent?.notes }}</p>
         </div>
@@ -60,16 +65,11 @@
                     left: timeColWidth + 'px',
                     height: hours.length * rowHeight + 'px',
                 }">
-                    <!-- <div v-for="e in eventsForWeek" :key="e.id + '-' + e.type" class="event"
-                        :class="[e.type, e.isPast ? 'event-past' : 'event-future']" :style="getEventPosition(e)"
-                        :title="eLabel(e)" @click="onEventClick(e)" @mousemove="onEventHover($event, e)"
-                        @mouseleave="clearHover"> -->
-
                     <div v-for="e in eventsForWeek" :key="e.id + '-' + e.type" class="event"
                         :class="[e.type, e.isPast ? 'event-past' : 'event-future', 'doctor-' + e.doctor_id]"
                         :style="getEventPosition(e)" :title="eLabel(e)" @click="onEventClick(e)"
                         @mousemove="onEventHover($event, e)" @mouseleave="clearHover">
-                        <p :class="'text-' + e.user_type">
+                        <p :class="'text-' + e.user_type" class="select-none">
                             {{ eLabel(e) }}
                         </p>
                     </div>
@@ -150,13 +150,17 @@ const tooltipStyle = computed(() => {
     return { position: 'absolute', left: left + 'px', top: top + 'px', zIndex };
 }) as any;
 
+
 function onEventHover(ev: MouseEvent, event: any) {
-    const rect = (ev.target as HTMLElement).getBoundingClientRect();
+    const target = ev.currentTarget as HTMLElement; // currentTarget zamiast target
+    const rect = target.getBoundingClientRect();
     const tooltipWidth = 300;
     const tooltipHeight = 220;
     const margin = 10;
+
     let x = rect.right + margin + window.scrollX;
     let y = rect.top + window.scrollY;
+
     let showLeft = false;
     let showAbove = false;
 
@@ -165,11 +169,13 @@ function onEventHover(ev: MouseEvent, event: any) {
         showLeft = true;
     }
     if (window.innerHeight < y + tooltipHeight) {
-        y = rect.top - 182 + window.scrollY;
+        y = rect.bottom - tooltipHeight - margin + window.scrollY; // używamy rect.bottom
         showAbove = true;
     }
+
     hoverPosition.value = { x, y };
     tooltipAbove.value = showAbove;
+    tooltipLeft.value = showLeft;
     hoverEvent.value = event;
 }
 
@@ -273,20 +279,47 @@ const eventsForWeek = computed(() => {
     const end = dayjs(weekDays.value[weekDays.value.length - 1].date).endOf('day');
     const events = [] as any[];
 
+    // visits.value.forEach((v: any) => {
+    //     const eventDate = dayjs(`${v.date} ${v.end_time}`);
+    //     if (eventDate.isBetween(start, end, 'day', '[]')) {
+    //         events.push({
+    //             id: v.visit_id,
+    //             type: 'visit',
+    //             date: v.date,
+    //             start_time: v.start_time,
+    //             time: `${v.start_time}-${v.end_time}`,
+    //             end_time: v.end_time,
+    //             label: `${v.user_name.charAt(0)}. ${v.user_surname}`,
+    //             name: `${v.user_name} ${v.user_surname}`,
+    //             user_type: v.user_type,
+    //             phone: v.phone,
+    //             notes: v.last_user_note?.text,
+    //             fast_note: v.fast_note?.text,
+    //             doctor_id: v.doctor_id,
+    //             isPast: eventDate.isBefore(dayjs()),
+    //         });
+    //     }
+    // });
+
     visits.value.forEach((v: any) => {
         const eventDate = dayjs(`${v.date} ${v.end_time}`);
         if (eventDate.isBetween(start, end, 'day', '[]')) {
+            // funkcja pomocnicza do odcięcia ":00"
+            const formatTime = (t: string) => t.endsWith(':00') ? t.slice(0, -3) : t;
+
             events.push({
                 id: v.visit_id,
                 type: 'visit',
                 date: v.date,
                 start_time: v.start_time,
                 end_time: v.end_time,
+                time: `${formatTime(v.start_time)}-${formatTime(v.end_time)}`, // <-- bez :00
                 label: `${v.user_name.charAt(0)}. ${v.user_surname}`,
                 name: `${v.user_name} ${v.user_surname}`,
                 user_type: v.user_type,
                 phone: v.phone,
                 notes: v.last_user_note?.text,
+                fast_note: v.fast_note?.text,
                 doctor_id: v.doctor_id,
                 isPast: eventDate.isBefore(dayjs()),
             });
