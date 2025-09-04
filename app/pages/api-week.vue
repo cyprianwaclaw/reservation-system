@@ -25,6 +25,7 @@
         </div>
         <h1 class="font-semibold text-[32px] ml-[80px]">Planowane wizyty</h1>
         <InputCalendar v-model="displayDate" />
+        <LoadingButton :isLoading="isApiLoading" text="Zapisz" @click="apiLoading"/>
     </div>
     <div :class="isLoading == true ? 'window-loading' : 'main-window'">
         <div class="schedule-scroll">
@@ -129,6 +130,18 @@ const hoverEvent = ref<any>(null)
 const hoverPosition = ref<{ x: number, y: number } | null>(null)
 const tooltipAbove = ref(false)
 const tooltipLeft = ref(false)
+
+
+
+const isApiLoading = ref(false)
+
+const apiLoading = () => {
+        isApiLoading.value = true
+    setTimeout(() => {
+        isApiLoading.value = false
+    }, 700)
+}
+
 
 const tooltipStyle = computed(() => {
     if (!hoverPosition.value) return {};
