@@ -1,23 +1,26 @@
 <template>
     <Transition>
-        <div class="modal-conatiner" @click="resetErrors()">
-            <div class="blur-background-update" v-if="props.modalActive" @click="$emit('close')" />
-            <Transition @before-enter="onBefore" @leave="onLeave">
-                <div class="modal-view p-[20px]" v-if="props.modalActive">
-                    <div class="close-icon-div">
-                        <Icon name="carbon:close" size="40" class="close-icon -mt-[14px] -mr-[10px]"
-                            @click="$emit('close')" />
+        <Teleport to="body">
+            <div class="modal-conatiner" @click="resetErrors()">
+                <div class="blur-background-update" v-if="props.modalActive" @click="$emit('close')" />
+                <Transition @before-enter="onBefore" @leave="onLeave">
+                    <div class="modal-view p-[20px]" v-if="props.modalActive">
+                        <div class="close-icon-div">
+                            <Icon name="carbon:close" size="40" class="close-icon -mt-[14px] -mr-[10px]"
+                                @click="$emit('close')" />
+                        </div>
+                        <div class="flex w-full h-full -mt-[23px] p-5">
+                            <ModalTemplateVisit :vistId="data" v-if="component === 'visit'" />
+                            <ModalTemplateAddPatient :vistId="data" v-if="component === 'addPatient'" />
+                            <ModalTemplateAllPatient :patientId="data" v-if="component === 'allPatient'" />
+                            <ModalTemplateSchedule :patientId="data" v-if="component === 'schedule'" />
+                            <ModalTemplateAddVisit :vistId="data" v-if="component === 'addVisit'" />
+                            <ModalTemplateVacation :vistId="data" v-if="component === 'vacation'" />
+                        </div>
                     </div>
-                    <div class="flex w-full h-full -mt-[23px] p-5">
-                        <ModalTemplateVisit :vistId="data" v-if="component === 'visit'" />
-                        <ModalTemplateAddPatient :vistId="data" v-if="component === 'addPatient'" />
-                        <ModalTemplateAllPatient :patientId="data" v-if="component === 'allPatient'" />
-                        <ModalTemplateAddVisit :vistId="data" v-if="component === 'addVisit'" />
-                        <ModalTemplateVacation :vistId="data" v-if="component === 'vacation'" />
-                    </div>
-                </div>
-            </Transition>
-        </div>
+                </Transition>
+            </div>
+        </Teleport>
     </Transition>
 </template>
 
@@ -34,7 +37,7 @@ const props = defineProps<{
     modalActive: boolean
 }>()
 
-watch(props, (newValue: any)=> {
+watch(props, (newValue: any) => {
     newValue.modalActive ? openModal() : ''
     console.log(newValue)
 })

@@ -1,24 +1,31 @@
 <template>
     <Modal :component="modalName" :modalActive="showModal" @close="handleModal('allPatient')" />
-    <div v-if="!isLoading && router.currentRoute.value?.name !== 'logowanie'"
-        class="header flex w-full justify-between place-items-center px-[28px] cursor-default" ref="root"
-        :class="router.currentRoute.value?.name !== 'api-week' ? 'sticky top-0 z-50 bg-white' : ''">
-        <img class="logo" src="@/assets/images/logo.png" />
-        <div class="flex gap-[6px]" v-if="router.currentRoute.value?.name === 'api-week'">
-            <div class="flex place-items-center gap-[11px] button-action-users select-none"
-                @click="handleModal('allPatient')">
-                <Icon name="ph:users-bold" size="28" class="primary-color" />
-                <p class="font-semibold text-[17px] mt-[1px] text-black-own ">Pacjenci</p>
+    <div v-if="router.currentRoute.value?.name !== 'logowanie' && !isLoading">
+        <div v-if="router.currentRoute.value?.name === 'api-week' && !isLoading"
+            class="header-new fixed top-0 left-0 h-screen flex flex-col items-center justify-between">
+            <img class="w-[58px] h-[58px] mt-[20px]" src="@/assets/images/logo-small.png" />
+            <div class="flex flex-col items-center mb-[16px] gap-[5px]">
+                <Add />
+                <div class="icon-button" @click="handleModal('allPatient')">
+                    <Icon name="ph:users-bold" size="28" class="primary-color" />
+                </div>
+                <div class="icon-button" @click="handleModal('schedule')">
+                    <Icon name="ph:calendar-blank-bold" size="29" class="primary-color" />
+                </div>
             </div>
-            <Add />
         </div>
-        <div v-else class="text-[16px] font-medium flex gap-[21px]">
-    <NuxtLink to="https://fizjoterapia-kaczmarek.pl/" target="_blank" rel="noopener noreferrer" class="hover:text-gray-500">
-      Fizjoterapia Kaczmarek
-    </NuxtLink>
-    <NuxtLink to="https://centrumzdrowiabiegacza.pl/" target="_blank" rel="noopener noreferrer" class="hover:text-gray-500">
-      Centrum Zdrowia Biegacza
-    </NuxtLink>
+        <div v-else class="header flex w-full justify-between place-items-center px-[28px] cursor-default" ref="root">
+            <img class="logo" src="@/assets/images/logo.png" />
+            <div class="text-[16px] font-medium flex gap-[21px]">
+                <NuxtLink to="https://fizjoterapia-kaczmarek.pl/" target="_blank" rel="noopener noreferrer"
+                    class="hover:text-gray-500">
+                    Fizjoterapia Kaczmarek
+                </NuxtLink>
+                <NuxtLink to="https://centrumzdrowiabiegacza.pl/" target="_blank" rel="noopener noreferrer"
+                    class="hover:text-gray-500">
+                    Centrum Zdrowia Biegacza
+                </NuxtLink>
+            </div>
         </div>
     </div>
 </template>
@@ -36,7 +43,7 @@ onMounted(() => {
     if (router.currentRoute.value?.name === 'api-week') {
         setTimeout(() => {
             isLoading.value = false
-        }, 1100)
+        }, 960)
     } else {
         isLoading.value = false
     }
@@ -49,22 +56,13 @@ onMounted(() => {
     border: 1px solid #e6e9ef;
 }
 
+.header-new {
+    width: 80px;
+    border-right: 2px solid #e6e9ef;
+    background: #fff;
+}
+
 .logo {
     width: 130px;
-}
-
-.button-action-users {
-    display: flex;
-    align-items: center;
-    padding: 9px 19px 9px 16px;
-    border-radius: 999px;
-    border: 1px solid white;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.button-action-users:hover {
-    background: #26a2c81f;
-    border: 1px solid #31a9ce5c;
 }
 </style>

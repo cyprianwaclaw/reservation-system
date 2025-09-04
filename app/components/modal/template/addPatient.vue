@@ -24,19 +24,12 @@
                         <InputBase v-model="city" name="city" placeholder="Miejscowość" />
                     </div>
                     <InputBase v-model="street" name="street" placeholder="Nazwa ulicy oraz numer" />
-
-                    <!-- <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Dane kontaktowe</p>
-                    <InputBase v-model="email" name="email" placeholder="E-mail" />
-                    <InputBase v-model="phone" name="phone" placeholder="Telefon" /> -->
-
                 </div>
             </div>
             <div class="w-full flex flex-col gap-[10px]">
                 <p class="text-[16px] font-semibold primary-color -mb-[2px]">Dane kontaktowe</p>
                 <InputBase v-model="email" name="email" placeholder="E-mail" />
-                <InputBase v-model="phone" name="phone" placeholder="Telefon" />
-                <!-- <p class="text-[16px] font-semibold primary-color -mb-[2px]">Rodzaj pacjenta</p>
-                <InputSelect v-model="patientType" :options="patientTypeOptions" placeholder="Wybierz rodzaj" /> -->
+                <InputBase v-model="phone" name="phone" placeholder="Numer telefonu" />
                 <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Napisz coś o pacjencie</p>
                 <textarea v-model="description" placeholder="O pacjencie..."
                     class="add-description min-h-[170px]"></textarea>
@@ -48,7 +41,6 @@
                                 <p class="text-[18px] font-medium text-[#37B342]">Dodano poprawnie pacjenta</p>
                             </div>
                         </Transition>
-
                         <button class="primary-button" @click="addPatient()">Dodaj</button>
                     </div>
                 </div>

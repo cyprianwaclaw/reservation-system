@@ -3,10 +3,10 @@
     <div v-if="isLoading">
         <LoadingSpinner :isLoading="true" class="-mt-[120px]" />
     </div>
-    <div class="flex place-items-center w-full justify-between px-[30px] pb-[24px] mt-[60px]"
+    <div class="flex place-items-center w-full justify-between px-[30px] pb-[24px] mt-[30px]"
         :class="isLoading == true ? 'window-loading' : ''">
         <div v-if="hoverEvent && hoverPosition" class="event-tooltip"
-            :class="[tooltipAbove ? 'event-tooltip--top' : '', tooltipLeft ? 'event-tooltip--left' : '']"
+            :class="[tooltipAbove ? 'event-tooltip--top' : '', tooltipLeft ? 'event-tooltip-arrow--left' : '']"
             :style="tooltipStyle">
             <div class="event-tooltip-arrow"
                 :class="[tooltipAbove ? 'event-tooltip-arrow--top' : '', tooltipLeft ? 'event-tooltip-arrow--left' : '']">
@@ -23,7 +23,7 @@
             <p class="text-white font-semibold text-[13px]  mt-[12px]">Ostatnia wizyta</p>
             <p class="text-white">{{ hoverEvent?.notes }}</p>
         </div>
-        <h1 class="font-semibold text-[32px]">Kalendarz z wizytami</h1>
+        <h1 class="font-semibold text-[32px] ml-[80px]">Planowane wizyty</h1>
         <InputCalendar v-model="displayDate" />
     </div>
     <div :class="isLoading == true ? 'window-loading' : 'main-window'">
@@ -59,6 +59,7 @@
                                 :style="{ width: columnWidth + 'px' }"></div>
                         </template>
                     </div>
+
                 </div>
                 <div class="events-layer" :style="{
                     width: weekDays.length * doctors.length * columnWidth + 'px',
@@ -279,32 +280,10 @@ const eventsForWeek = computed(() => {
     const end = dayjs(weekDays.value[weekDays.value.length - 1].date).endOf('day');
     const events = [] as any[];
 
-    // visits.value.forEach((v: any) => {
-    //     const eventDate = dayjs(`${v.date} ${v.end_time}`);
-    //     if (eventDate.isBetween(start, end, 'day', '[]')) {
-    //         events.push({
-    //             id: v.visit_id,
-    //             type: 'visit',
-    //             date: v.date,
-    //             start_time: v.start_time,
-    //             time: `${v.start_time}-${v.end_time}`,
-    //             end_time: v.end_time,
-    //             label: `${v.user_name.charAt(0)}. ${v.user_surname}`,
-    //             name: `${v.user_name} ${v.user_surname}`,
-    //             user_type: v.user_type,
-    //             phone: v.phone,
-    //             notes: v.last_user_note?.text,
-    //             fast_note: v.fast_note?.text,
-    //             doctor_id: v.doctor_id,
-    //             isPast: eventDate.isBefore(dayjs()),
-    //         });
-    //     }
-    // });
 
     visits.value.forEach((v: any) => {
         const eventDate = dayjs(`${v.date} ${v.end_time}`);
         if (eventDate.isBetween(start, end, 'day', '[]')) {
-            // funkcja pomocnicza do odcięcia ":00"
             const formatTime = (t: string) => t.endsWith(':00') ? t.slice(0, -3) : t;
 
             events.push({
@@ -431,7 +410,13 @@ function updateCenterDay() {
 
     if (dayIndex >= 0 && dayIndex < weekDays.value.length) {
         centerDay.value = weekDays.value[dayIndex];
-        centerDayCookie.value = centerDay.value.date;
+
+        // zapisujemy displayDate zamiast surowego selectedDate
+        let dateToSave = dayjs(centerDay.value.date).subtract(1, "day");
+        while (dateToSave.day() === 0 || dateToSave.day() === 6) {
+            dateToSave = dateToSave.subtract(1, "day");
+        }
+        centerDayCookie.value = dateToSave.format("YYYY-MM-DD");
     } else {
         centerDay.value = null;
     }
@@ -446,31 +431,25 @@ onMounted(async () => {
     setWeekStartFromCookieOrToday();
     await fetchData();
     scheduleScrollEl.value = document.querySelector('.schedule-scroll') as HTMLElement;
+
     const initialDate = centerDayCookie.value || todayDate;
     const dayIndex = weekDays.value.findIndex((d: any) => d.date === initialDate);
 
     if (scheduleScrollEl.value && dayIndex >= 0) {
         setTimeout(() => {
-            scrollDayToCenter(dayIndex);
+            scrollDayToLeft(dayIndex);
         }, 50);
-    } else {
-        if (scheduleScrollEl.value) {
-            const todayIndex = weekDays.value.findIndex((d: any) => d.date === todayDate);
-            if (todayIndex >= 0) {
-                setTimeout(() => {
-                    scrollDayToCenter(todayIndex);
-                }, 50);
-            }
-        }
     }
+
     scheduleScrollEl.value?.addEventListener('wheel', onWheelScroll, { passive: false });
     scheduleScrollEl.value?.addEventListener("scroll", updateCenterDay);
     updateCurrentTime();
     interval = setInterval(updateCurrentTime, 100);
     setTimeout(() => {
         isLoading.value = false;
-    }, 800)
+    }, 900)
 });
+
 
 onBeforeUnmount(() => {
     if (interval) clearInterval(interval);
@@ -478,31 +457,29 @@ onBeforeUnmount(() => {
     scheduleScrollEl.value?.removeEventListener('scroll', updateCenterDay);
 });
 
-function scrollDayToCenter(dayIndex: number) {
+function scrollDayToLeft(dayIndex: number) {
     if (!scheduleScrollEl.value) return;
     const dayWidth = doctors.length * columnWidth;
     const dayStart = timeColWidth + dayIndex * dayWidth;
-    const dayCenter = dayStart + dayWidth / 2;
-    const viewportCenter = scheduleScrollEl.value.clientWidth / 2;
-    const targetScroll = dayCenter - viewportCenter;
+    const targetScroll = dayStart - 130;
     scheduleScrollEl.value.scrollTo({
         left: targetScroll,
         behavior: "smooth",
     });
 }
 
-function scrollTodayToCenter() {
+function scrollTodayToLeft() {
     resetUserSelected()
     const todayIndex = weekDays.value.findIndex((d: any) => d.date === todayDate);
     if (todayIndex >= 0) {
-        scrollDayToCenter(todayIndex);
+        scrollDayToLeft(todayIndex);
     } else {
         weekStart.value = today.startOf("day");
         saveWeekStartToCookie();
         fetchData().then(() => {
             const newIndex = weekDays.value.findIndex((d: any) => d.date === todayDate);
             if (newIndex >= 0) {
-                setTimeout(() => scrollDayToCenter(newIndex), 50);
+                setTimeout(() => scrollDayToLeft(newIndex), 50);
             }
         });
     }
@@ -511,27 +488,46 @@ function scrollTodayToCenter() {
 const selectedDate = ref(today.format("YYYY-MM-DD"));
 const userSelectedDate = ref<string | null>(null);
 
+// const displayDate = computed({
+//     get() {
+//         return selectedDate.value
+//     },
+//     set(val: string) {
+//         selectedDate.value = val
+//         onDateChange()
+//     }
+// })
+
 const displayDate = computed({
     get() {
-        return selectedDate.value
+        let date = dayjs(selectedDate.value).subtract(1, "day");
+        // jeśli wpadnie na weekend, cofamy aż do piątku
+        while (date.day() === 0 || date.day() === 6) {
+            date = date.subtract(1, "day");
+        }
+        return date.format("YYYY-MM-DD");
     },
     set(val: string) {
-        selectedDate.value = val
-        onDateChange()
+        selectedDate.value = val;
+        onDateChange();
     }
-})
+});
 
 function onDateChange() {
     const chosen = dayjs(selectedDate.value);
     if (!chosen.isValid()) return;
+    // log tylko dla ręcznej zmiany
+    if (userSelectedDate.value !== selectedDate.value) {
+        console.log('now data', selectedDate.value);
+    }
     weekStart.value = chosen.startOf("day");
     saveWeekStartToCookie();
     fetchData().then(() => {
         const dayIndex = weekDays.value.findIndex((d: any) => d.date === chosen.format("YYYY-MM-DD"));
         if (dayIndex >= 0) {
-            setTimeout(() => scrollDayToCenter(dayIndex), 50);
+            setTimeout(() => scrollDayToLeft(dayIndex), 50);
         } else {
-            scrollTodayToCenter();
+            scrollTodayToLeft();
         }
     });
     userSelectedDate.value = selectedDate.value;
@@ -577,28 +573,37 @@ watch(centerDay, (val) => {
     background-color: #f507dd6f !important;
     /* żółty */
 }
+
 .text-prywatny {
-  color: #000000 !important; /* czarny */
+    color: #000000 !important;
+    /* czarny */
 }
 
 .text-AWF {
-  color: #ff0000 !important; /* czerwony */
+    color: #ff0000 !important;
+    /* czerwony */
 }
 
-.text-Klub.gimnastyki{
-  color: #0000ff !important; /* niebieski */
+.text-Klub.gimnastyki {
+    color: #0000ff !important;
+    /* niebieski */
 }
 
 .text-Od.Grzegorza {
-  color: #ffff00 !important; /* żółty */
+    color: #ffff00 !important;
+    /* żółty */
 }
 
 .text-Od.Asi {
-  color: #008000 !important; /* zielony */
+    color: #008000 !important;
+    /* zielony */
 }
+
 .text-null {
-  color: #8b4513 !important; /* brązowy */
+    color: #8b4513 !important;
+    /* brązowy */
 }
+
 .event-tooltip {
     background: #333333d2;
     color: #fff;

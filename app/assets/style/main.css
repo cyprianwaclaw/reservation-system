@@ -167,8 +167,9 @@ p {
 }
 
 .main-window {
-  width: 100vw;
-  max-height: 77vh;
+  margin-left: 80px;
+  width: 190vw;
+  /* max-height: 77vh; */
   overflow-y: auto;
 }
 
@@ -276,10 +277,6 @@ p {
   background: #fff;
 }
 
-.day-col.alt-bg {
-  background: #84cfe621;
-}
-
 .doctor-col {
   width: 100px;
   min-width: 100px;
@@ -302,10 +299,6 @@ p {
 .doctor-text {
   color: #8a8a8a;
   font-size: 15px !important;
-}
-
-.doctor-col.alt-bg {
-  background: #84cfe621;
 }
 
 .hour-row {
@@ -342,8 +335,10 @@ p {
   background: #fff;
 }
 
-.slot-cell.alt-bg {
+.alt-bg {
   background: #84cfe621;
+  /* background: white; */
+
 }
 
 .events-layer {
@@ -431,18 +426,24 @@ p {
 
 .current-time-box {
   position: absolute;
-  margin-top: 26px;
-  left: 33px;
+  top: 26px;
+  left: 32px;
+  width: 43px;
+  height: 20px;
   transform: translateY(-50%);
   background-color: red;
   color: white;
-  padding: 3px 8px;
+  padding: 2px 6px;
   border-radius: 99px;
   font-weight: 500;
   font-size: 11px;
   user-select: none;
   pointer-events: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
 
 /* close icon */
 .close-icon {
@@ -536,4 +537,20 @@ p {
   max-height: 100%;
   max-width: 100%;
   object-fit: contain;
+}
+
+/* icon header button */
+.icon-button {
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 9999px;
+  transition: background-color 0.25s ease;
+}
+
+.icon-button:hover {
+  background-color: #e0f2fecb;
 }
