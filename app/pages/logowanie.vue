@@ -43,6 +43,7 @@
 </template>
 
 <script setup lang="ts">
+const isApiLoading = ref(false)
 const { resetErrors, setErrors } = useErrors()
 const axiosInstance = useNuxtApp().$axiosInstance as any
 
@@ -55,6 +56,7 @@ onMounted(() => {
 })
 
 const login = async () => {
+    isApiLoading.value = true
     try {
         const { data } = await axiosInstance.post('/doctor/login', {
             email: email.value,
@@ -69,6 +71,8 @@ const login = async () => {
         }
     } catch (err: any) {
         setErrors(err.response?.data?.errors)
+    } finally {
+        isApiLoading.value = false
     }
 }
 </script>

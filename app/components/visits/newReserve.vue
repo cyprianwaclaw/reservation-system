@@ -108,8 +108,8 @@
                     <div v-if="selectedDate && selectedPerson && selectedTime" class="booking-form">
                         <h3>Twoje dane</h3>
                         <div class="flex place-items-center gap-[3px] text-[#4658e3] -mt-[6px] mb-[18px]">
-                            <Icon name="ph:warning-circle" size="23"/>
-                            <p class="text-[14px] ">Wymagamy tylko imienia, nazwiska oraz numeru telefonu</p>                            
+                            <Icon name="ph:warning-circle" size="23" />
+                            <p class="text-[14px] ">Wymagamy tylko imienia, nazwiska oraz numeru telefonu</p>
                         </div>
 
                         <form @submit.prevent="book">
@@ -132,13 +132,16 @@
                                 <textarea v-model="form.description" placeholder="Opisz swoje dolegliwości..."
                                     class="add-description min-h-[170px]"></textarea>
                             </div>
-                            <div class="mt-[21px]">
+                            <div class="mt-[15px]">
                                 <label class="checkbox-wrapper">
                                     <input type="checkbox" v-model="isChecked" class="checkbox-hidden" />
                                     <span class="checkbox-custom"></span>
                                     <p class="text-[#8a8a8a] mt-[2px]">akceptuje regulamin i politykę prywatności</p>
                                 </label>
-                                <button type="submit" class="reserve-button mt-[16px]">Zarezerwuj wizytę</button>
+                                <LoadingButton type="submit" class=" mt-[32px]" :isLoading="isApiLoading"
+                                    text="Zarezerwuj wizytę" />
+
+                                <!-- <button type="submit" class="reserve-button mt-[16px]">Zarezerwuj wizytę</button> -->
                             </div>
                         </form>
                     </div>
@@ -149,6 +152,7 @@
 </template>
 
 <script setup lang="ts">
+const isApiLoading = ref(false)
 const hoveredPerson = ref<number | null>(null)
 const axiosInstance = useNuxtApp().$axiosInstance as any
 const { setErrors } = useErrors()
@@ -253,7 +257,7 @@ async function loadAvailableDays() {
                 free_slots: doc.free_slots.filter((slot: string) => !blockedHours.includes(slot)),
             })),
         }))
-         emit('isLoading', false)
+        emit('isLoading', false)
     } catch (error) {
         console.error('Błąd ładowania dostępnych dni:', error)
     }
@@ -324,8 +328,9 @@ function selectTime(time: string) {
 // Rezerwacja
 async function book() {
     // if (!selectedDate.value || !selectedPerson.value || !selectedTime.value) return
-    // if (!form.value.name || !form.value.surname || !form.value.phone || !form.value.email || !isChecked.value) return
+    if (!form.value.name || !form.value.surname || !form.value.phone || !isChecked.value) return
 
+    isApiLoading.value = true
     try {
         await axiosInstance.post('/reserve', {
             doctor_id: selectedPerson.value,
@@ -340,7 +345,6 @@ async function book() {
             start_time: selectedTime.value,
             duration: 45,
         })
-
 
         await loadAvailableDays()
 
@@ -364,6 +368,10 @@ async function book() {
         if (err.response?.data?.errors) {
             setErrors(err.response.data.errors);
         }
+    } finally {
+        setTimeout(() =>{  
+            isApiLoading.value = false
+        }, 250)
     }
 }
 
@@ -604,4 +612,5 @@ h3 {
     opacity: 1;
     transform: translateY(0);
 }
+
 </style>

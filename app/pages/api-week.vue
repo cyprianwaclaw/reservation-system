@@ -25,7 +25,7 @@
         </div>
         <h1 class="font-semibold text-[32px] ml-[80px]">Planowane wizyty</h1>
         <InputCalendar v-model="displayDate" />
-        <LoadingButton :isLoading="isApiLoading" text="Zapisz" @click="apiLoading"/>
+        <!-- <LoadingButton :isLoading="isApiLoading" text="Zapisz" @click="apiLoading"/> -->
     </div>
     <div :class="isLoading == true ? 'window-loading' : 'main-window'">
         <div class="schedule-scroll">

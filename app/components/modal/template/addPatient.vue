@@ -38,10 +38,10 @@
                         <Transition name="fade-slide">
                             <div v-if="isSuccess" class="flex place-items-center gap-[5px]">
                                 <Icon name="ph:check-circle" size="28" class="text-[#37B342]" />
-                                <p class="text-[18px] font-medium text-[#37B342]">Dodano poprawnie pacjenta</p>
+                                <p class="text-[18px] font-medium text-[#37B342]">Dodano pacjenta</p>
                             </div>
                         </Transition>
-                        <button class="primary-button" @click="addPatient()">Dodaj</button>
+                        <LoadingButton :isLoading="isApiLoading" text="Dodaj pacjenta" @click="addPatient()" />
                     </div>
                 </div>
             </div>
@@ -65,6 +65,7 @@ const pesel = ref("");
 const patientType = ref('')
 const description = ref("")
 const isSuccess = ref()
+const isApiLoading = ref(false)
 
 const patientTypeOptions = ref<{ value: string; label: string }[]>([
     { value: 'Prywatny', label: 'Prywatny' },
@@ -81,6 +82,10 @@ function clearPatientInputs() {
     surName.value = "";
     email.value = "";
     phone.value = "";
+    city.value = "";
+    city_code.value = "";
+    street.value = "";
+    pesel.value = "";
     description.value = "";
     age.value = "";
     patientType.value = "";
@@ -103,17 +108,22 @@ const addPatient = async () => {
         data.surname &&
         data.phone
     ) {
+        isApiLoading.value = true
         try {
             const res = await axiosInstance.post('/add-patients', data);
-            isSuccess.value = res.data.message == 'Pacjent dodany pomyślnie' ? true : false
+            isSuccess.value = true
             clearPatientInputs()
             setTimeout(() => {
                 isSuccess.value = false
-            }, 1200)
+            }, 1800)
         } catch (err: any) {
             if (err.response?.data?.errors) {
                 setErrors(err.response.data.errors);
             }
+        } finally {
+            setTimeout(() => {
+                isApiLoading.value = false
+            }, 50)
         }
     }
 }

@@ -23,8 +23,7 @@
                         </div>
                         <div class="w-full flex flex-row gap-[10px]">
                             <InputBase v-model="email" name="email" placeholder="E-mail" :disabled="!!selectPatient" />
-                            <InputBase v-model="phone" name="phone" placeholder="Telefon"
-                                :disabled="!!selectPatient" />
+                            <InputBase v-model="phone" name="phone" placeholder="Telefon" :disabled="!!selectPatient" />
                         </div>
                         <p @click="clearPatientSelection" v-if="selectPatient"
                             class="underline cursor-pointer text-[#f43737] mt-[5px] text-[12px]">
@@ -42,7 +41,16 @@
                 <InputSelect v-model="newTime" :options="timeOptions" placeholder="Wybierz godzinę"
                     :disabled="!newDoctor" />
                 <div class="absolute bottom-[30px] right-[40px]">
-                    <button class="primary-button" @click="addVisit()">Dodaj</button>
+                    <div class="flex gap-[15px]">
+                        <Transition name="fade-slide-confirm">
+                            <div v-if="isSuccess" class="flex place-items-center gap-[5px]">
+                                <Icon name="ph:check-circle" size="28" class="text-[#37B342]" />
+                                <p class="text-[18px] font-medium text-[#37B342]">Dodano wizytę</p>
+                            </div>
+                        </Transition>
+                        <LoadingButton :isLoading="isApiLoading" text="Dodaj wizytę" @click="addVisit()" />
+                    </div>
+                    <!-- <button class="primary-button" @click="addVisit()">Dodaj wizytę</button> -->
                 </div>
             </div>
         </div>
@@ -50,6 +58,9 @@
 </template>
 
 <script setup lang="ts">
+const isApiLoading = ref(false)
+const isSuccess = ref()
+
 const axiosInstance = useNuxtApp().$axiosInstance as any
 const { setErrors } = useErrors()
 const { closeModal } = useCloseModal()
@@ -127,6 +138,7 @@ function clearPatientInputs() {
     surName.value = '';
     email.value = '';
     phone.value = '';
+    visitType.value = ''
 }
 
 function clearPatientSelection() {
@@ -181,23 +193,33 @@ const addVisit = async () => {
         data.name &&
         data.surname &&
         data.phone &&
-        data.email &&
         data.date &&
         data.start_time
     ) {
+        isApiLoading.value = true
         try {
-            await axiosInstance.post('/reserve', data);
-
+            const res = await axiosInstance.post('/reserve', data);
+            setTimeout(() => {
+                isSuccess.value = res.data?.message == 'Zarezerwowano' ? true : false
+                 }, 280)
             clearPatientSelection()
             newDate.value = '';
             newDoctor.value = null;
             newTime.value = '';
             showPatientInputs.value = false;
-            closeModal()
+            // closeModal()
         } catch (err: any) {
             if (err.response?.data?.errors) {
+                isSuccess.value = false
                 setErrors(err.response.data.errors);
             }
+        } finally {
+            setTimeout(() => {
+                isApiLoading.value = false
+            }, 250)
+                        setTimeout(() => {
+                 isSuccess.value = false
+            }, 1400)
         }
     }
 }
@@ -215,8 +237,29 @@ const addVisit = async () => {
     transform: translateY(-5px);
 }
 
-.fade-slide-enter-to,
-.fade-slide-leave-from {
+.fade-slide-confirm-enter-to,
+.fade-slide-confirm-leave-from {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fade-slide-confirm-enter-active,
+.fade-slide-confirm-leave-active {
+    transition: all 0.4s ease;
+}
+
+.fade-slide-confirm-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.fade-slide-confirm-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.fade-slide-confirm-enter-to,
+.fade-slide-confirm-leave-from {
     opacity: 1;
     transform: translateY(0);
 }

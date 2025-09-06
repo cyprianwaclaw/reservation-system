@@ -75,9 +75,8 @@ onMounted(() => {
   0% {
     transform: rotate(0deg);
   }
-
   100% {
-    transform: rotate(270deg);
+    transform: rotate(360deg);
   }
 }
 
@@ -85,32 +84,26 @@ onMounted(() => {
   stroke-dasharray: 187;
   stroke-dashoffset: 0;
   transform-origin: center;
-  animation: dash 1.2s ease-in-out infinite, colors 4.8s ease-in-out infinite;
-}
-
-@keyframes colors {
-
-  0%,
-  25%,
-  50%,
-  75%,
-  100% {
-    stroke: #288ead;
-  }
+  animation: dash 1s ease-in-out infinite, colors 4s ease-in-out infinite;
 }
 
 @keyframes dash {
   0% {
     stroke-dashoffset: 187;
   }
-
   50% {
     stroke-dashoffset: 46.75;
     transform: rotate(135deg);
   }
-
   100% {
     stroke-dashoffset: 187;
-    transform: rotate(450deg);
+    transform: rotate(360deg);
   }
-}</style>
+}
+
+@keyframes colors {
+  0%, 25%, 50%, 75%, 100% {
+    stroke: #247f9b;
+  }
+}
+</style>

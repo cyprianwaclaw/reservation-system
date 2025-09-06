@@ -34,7 +34,16 @@
                     </div>
                 </Transition>
                 <div class="absolute bottom-[0px] right-[0px]">
-                    <button class="primary-button" @click="addVacation()">Dodaj</button>
+                    <div class="flex gap-[15px]">
+                        <Transition name="fade-slide-confirm">
+                            <div v-if="isSuccess" class="flex place-items-center gap-[5px]">
+                                <Icon name="ph:check-circle" size="28" class="text-[#37B342]" />
+                                <p class="text-[18px] font-medium text-[#37B342]">Dodano wolne</p>
+                            </div>
+                        </Transition>
+                        <LoadingButton :isLoading="isApiLoading" text="Dodaj wolne" @click="addVacation()" />
+                    </div>
+                    <!-- <button class="primary-button" @click="addVacation()">Dodaj</button> -->
                 </div>
             </div>
         </div>
@@ -42,8 +51,10 @@
 </template>
 
 <script setup lang="ts">
+const isApiLoading = ref(false)
 const axiosInstance = useNuxtApp().$axiosInstance as any;
 const { closeModal } = useCloseModal()
+const isSuccess = ref()
 
 const selectDoctor = ref<number | null>(null);
 const newDoctor = ref(null) as any
@@ -175,14 +186,25 @@ const addVacation = async () => {
     };
 
     if (validateVacationData(data)) {
-        {
-            try {
-                const res = await axiosInstance.post('/add-vacations', data);
-                clearInputs();
-                closeModal()
-            } catch (err) {
-                console.error('Błąd podczas dodawania wizyty:', err);
-            }
+        isApiLoading.value = true
+        try {
+            const res = await axiosInstance.post('/add-vacations', data);
+
+            setTimeout(() => {
+                isSuccess.value = res.data?.message == 'Wakacje dodane' ? true : false
+            }, 280)
+
+            clearInputs();
+            // closeModal()
+        } catch (err) {
+            console.error('Bd podczas dodawania wizyty:', err);
+        } finally {
+            setTimeout(() => {
+                isApiLoading.value = false
+            }, 250)
+            setTimeout(() => {
+                isSuccess.value = false
+            }, 1400)
         }
     }
 }
@@ -202,6 +224,33 @@ const addVacation = async () => {
 
 .fade-slide-enter-to,
 .fade-slide-leave-from {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fade-slide-confirm-enter-to,
+.fade-slide-confirm-leave-from {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.fade-slide-confirm-enter-active,
+.fade-slide-confirm-leave-active {
+    transition: all 0.4s ease;
+}
+
+.fade-slide-confirm-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.fade-slide-confirm-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.fade-slide-confirm-enter-to,
+.fade-slide-confirm-leave-from {
     opacity: 1;
     transform: translateY(0);
 }

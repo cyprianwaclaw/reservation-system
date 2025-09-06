@@ -2,7 +2,7 @@
     <Modal :component="modalName" :modalActive="showModal" :data="vistId" @close="handleModal('visit')" />
     <div ref="root">
         <div class="icon-button" @click="isOpenAdd = !isOpenAdd">
-            <Icon name="ph:plus-bold" size="28" class="primary-color" />
+            <Icon name="ph:plus-bold" size="25" class="primary-color" />
         </div>
         <Teleport to="body">
             <div class="adding-container select-none" v-if="isOpenAdd">

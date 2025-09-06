@@ -71,10 +71,10 @@
                         <textarea v-model="description" placeholder="O pacjencie..."
                             class="add-description min-h-[170px]"></textarea>
                     </div>
-                    <div class="flex place-items-center gap-[21px]">
-                        <button class="primary-button mt-[35px]" @click="updatePatient()">Zapisz</Button>
+                    <div class="flex place-items-center gap-[21px] mt-[32px]">
+                        <LoadingButton :isLoading="isApiLoading" text="Zapisz" @click="updatePatient()" />
                         <Transition name="fade-slide">
-                            <div v-if="isSuccess" class="flex place-items-center gap-[5px] mt-[36px]">
+                            <div v-if="isSuccess" class="flex place-items-center gap-[5px]">
                                 <Icon name="ph:check-circle" size="28" class="text-[#37B342]" />
                                 <p class="text-[18px] font-medium text-[#37B342]">Zapisano zmiany</p>
                             </div>
@@ -96,8 +96,9 @@
                             <div class="mt-[15px] gap-[5px] flex flex-col">
                                 <p class="text-gray-500 text-[16px]">{{ singleUser.email }}</p>
                                 <p class="text-gray-500 text-[16px]">
-                                       <!-- +48 {{ singleUser.phone ? singleUser.phone.replace(/\D/g, '').match(/.{1,3}/g)?.join(' ') : '' }} -->
-                                                   +48 {{ singleUser.phone ? singleUser.phone.replace(/\D/g, '').match(/.{1,3}/g)?.join(' ') : '' }}
+                                    <!-- +48 {{ singleUser.phone ? singleUser.phone.replace(/\D/g, '').match(/.{1,3}/g)?.join(' ') : '' }} -->
+                                    +48 {{ singleUser.phone ? singleUser.phone.replace(/\D/g, '').match(/.{1,3}/g)?.join('')
+                                        : '' }}
                                 </p>
                                 <p class="text-gray-500 text-[16px] -mt-[3px]">{{ singleUser.age }}</p>
                                 <p v-if="singleUser.pesel" class="text-gray-500 text-[16px] -mt-[3px]">PESEL: {{
@@ -204,6 +205,7 @@ const pesel = ref("");
 const patientType = ref('')
 const description = ref("")
 const isSuccess = ref()
+const isApiLoading = ref(false)
 
 const patientTypeOptions = ref<{ value: string; label: string }[]>([
     { value: 'Prywatny', label: 'Prywatny' },
@@ -328,8 +330,6 @@ const toggleEdit = () => {
         age.value = String(singleUser.value.age).split(' ')[0] as any
         patientType.value = singleUser.value.patient_type
         description.value = singleUser.value?.description
-    } else {
-        console.log('wyjscie z edycji')
     }
 }
 
@@ -356,6 +356,8 @@ const updatePatient = async () => {
     if (Object.keys(data).length === 0) return;
 
     try {
+        isApiLoading.value = true
+
         const res = await axiosInstance.patch(`/update-patient/${singleUser.value.id}`, data);
         isSuccess.value = res.data.message === 'User updated successfully';
 
@@ -363,49 +365,56 @@ const updatePatient = async () => {
 
         setTimeout(() => {
             isSuccess.value = false;
-            isEdit.value = false
         }, 1200);
 
-        // Odświeżamy pełną listę pacjentów
-        const currentUserId = singleUser.value?.id;
-        allPatient.value = {};
-        offset = 0;
-        allLoaded = false;
-        await fetchPatient();
-
-        // Po pobraniu listy, ponownie pobieramy aktualnego pacjenta
-        if (currentUserId) {
-            await fetchSingleUser(currentUserId);
-        }
+        setTimeout(async() => {
+            isEdit.value = false
+            // Odświeżamy pełną listę pacjentów
+            const currentUserId = singleUser.value?.id;
+            allPatient.value = {};
+            offset = 0;
+            allLoaded = false;
+            await fetchPatient();
+    
+            // Po pobraniu listy, ponownie pobieramy aktualnego pacjenta
+            if (currentUserId) {
+                await fetchSingleUser(currentUserId);
+            }
+        }, 1750);
 
     } catch (err: any) {
         if (err.response?.data?.errors) {
             setErrors(err.response.data.errors);
         }
     }
-};
-
-
-onMounted(() => {
-    fetchPatient()
-
-    if (props.patientId) {
-        fetchSingleUser(props.patientId)
+    finally {
+        setTimeout(() => {
+            isApiLoading.value = false
+        }, 150)
     }
+}
 
-    if (!containerRef.value) return;
 
-    containerRef.value.addEventListener('scroll', () => {
-        if (loading.value || allLoaded) return;
+    onMounted(() => {
+        fetchPatient()
 
-        if (containerRef.value) {
-            const { scrollTop, scrollHeight, clientHeight } = containerRef.value;
-            if (scrollTop + clientHeight >= scrollHeight - 100) {
-                fetchPatient();
-            }
+        if (props.patientId) {
+            fetchSingleUser(props.patientId)
         }
+
+        if (!containerRef.value) return;
+
+        containerRef.value.addEventListener('scroll', () => {
+            if (loading.value || allLoaded) return;
+
+            if (containerRef.value) {
+                const { scrollTop, scrollHeight, clientHeight } = containerRef.value;
+                if (scrollTop + clientHeight >= scrollHeight - 100) {
+                    fetchPatient();
+                }
+            }
+        });
     });
-});
 </script>
 
 <style scoped>

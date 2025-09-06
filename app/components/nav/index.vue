@@ -3,14 +3,14 @@
     <div v-if="router.currentRoute.value?.name !== 'logowanie' && !isLoading">
         <div v-if="router.currentRoute.value?.name === 'api-week' && !isLoading"
             class="header-new fixed top-0 left-0 h-screen flex flex-col items-center justify-between">
-            <img class="w-[58px] h-[58px] mt-[20px]" src="@/assets/images/logo-small.png" />
-            <div class="flex flex-col items-center mb-[16px] gap-[5px]">
+            <img class="w-[52px] h-[52px] mt-[20px]" src="@/assets/images/logo-small.png" />
+            <div class="flex flex-col items-center mb-[16px] gap-[4px]">
                 <Add />
                 <div class="icon-button" @click="handleModal('allPatient')">
-                    <Icon name="ph:users-bold" size="28" class="primary-color" />
+                    <Icon name="ph:users-bold" size="25" class="primary-color" />
                 </div>
                 <div class="icon-button" @click="handleModal('schedule')">
-                    <Icon name="ph:calendar-blank-bold" size="29" class="primary-color" />
+                    <Icon name="ph:calendar-dots-bold" size="26" class="primary-color" />
                 </div>
             </div>
         </div>

@@ -1,7 +1,7 @@
 <template>
     <div class="flex w-full gap-[50px] h-full cursor-default" v-if="visitData?.user">
         <div class="w-full relative">
-            <p class="primary-color font-semibold text-[13px]">{{ visitData.user.type ? visitData.user.type : 'Zapisanyprzez panel' }}</p>
+            <p class="primary-color font-semibold text-[13px]">{{ visitData.user.type ? visitData.user.type : 'Zapisany przez panel' }}</p>
             <div class="flex place-items-center gap-[14px]">
                 <p class="text-[26px] font-bold">{{ visitData.user.name }} {{ visitData.user.surname }}</p>
             </div>
@@ -37,7 +37,7 @@
                     <p class="text-[16px]">
                         {{ visitData.user.description }}
                     </p>
-<div v-if="!visitData.user.description" class="mt-[6px]">
+                    <div v-if="!visitData.user.description" class="mt-[6px]">
                         <p class="text-[#8b8b8b6a] font-bold text-[22px]">Brak opisu</p>
                     </div>
                 </div>
@@ -66,8 +66,17 @@
                     :disabled="newDoctor ? false : true" />
                 <!-- Przyciski -->
                 <div class="flex mt-[10px]">
+                                        <div class="flex gap-[15px]">
+                                            <LoadingButton :isLoading="isApiLoading" text="Gotowe" @click="confirmChangeDate()" />
+                                            <Transition name="fade-slide-confirm">
+                                                <div v-if="isSuccess" class="flex place-items-center gap-[5px]">
+                                                    <Icon name="ph:check-circle" size="28" class="text-[#37B342]" />
+                                                    <p class="text-[18px] font-medium text-[#37B342]">Zapisano</p>
+                                                </div>
+                                            </Transition>
+                        </div>
                     <!-- <Button class="remove-button" @click="confirmChangeDate()">Potwierdź</Button> -->
-                    <button class="primary-button" @click="confirmChangeDate()">Zapisz</button>
+                    <!-- <button class="primary-button" @click="confirmChangeDate()">Zapisz</button> -->
                 </div>
             </div>
             <!-- Blok standardowych przycisków -->
@@ -98,7 +107,8 @@
             <div class="absolute bottom-0 right-0 w-full">
                 <div class="relative mt-[14px]">
                     <textarea class="own-note" v-model="fastNote" placeholder="Notatka..."></textarea>
-                    <button class="primary-button-ghost absolute bottom-[20px] right-[20px]" @click="addFastNote()">Ok</button>
+                    <button class="primary-button-ghost absolute bottom-[20px] right-[20px]"
+                        @click="addFastNote()">Ok</button>
                 </div>
             </div>
         </div>
@@ -107,8 +117,11 @@
 </template>
 
 <script setup lang="ts">
+const isApiLoading = ref(false)
 const { closeModal } = useCloseModal()
 const axiosInstance = useNuxtApp().$axiosInstance as any;
+
+const isSuccess = ref()
 
 const props = defineProps({
     vistId: {
@@ -146,23 +159,33 @@ onMounted(async () => {
 
 const addNote = async () => {
     if (newNote.value.length > 3) {
-        const newNoteRes = await axiosInstance.post(`/visits/${props.vistId}/notes`, {
-            'text': newNote.value
-        })
-        newNote.value = ''
-        const res = await axiosInstance.get(`/schedule/visits/${props.vistId}`)
-        visitData.value = res.data
+        isApiLoading.value = true
+        try {
+            const newNoteRes = await axiosInstance.post(`/visits/${props.vistId}/notes`, {
+                'text': newNote.value
+            })
+            newNote.value = ''
+            const res = await axiosInstance.get(`/schedule/visits/${props.vistId}`)
+            visitData.value = res.data
+        } finally {
+            isApiLoading.value = false
+        }
     }
 }
 
 const addFastNote = async () => {
     if (fastNote.value.length > 3) {
-        const newFastNoteRes = await axiosInstance.post(`/visits/${props.vistId}/notes`, {
-            'text': fastNote.value,
-            "is_edit": true,
-        })
-        const res = await axiosInstance.get(`/schedule/visits/${props.vistId}`)
-        visitData.value = res.data
+        isApiLoading.value = true
+        try {
+            const newFastNoteRes = await axiosInstance.post(`/visits/${props.vistId}/notes`, {
+                'text': fastNote.value,
+                "is_edit": true,
+            })
+            const res = await axiosInstance.get(`/schedule/visits/${props.vistId}`)
+            visitData.value = res.data
+        } finally {
+            isApiLoading.value = false
+        }
     }
 }
 
@@ -193,14 +216,33 @@ const availableTimes = computed(() => {
 const confirmChangeDate = async () => {
     if (!newDate.value || !newDoctor.value || !newTime.value) return;
 
-    await axiosInstance.put(`/visits/${props.vistId}/update`, {
-        date: newDate.value,
-        hour: newTime.value,
-        doctor_id: newDoctor.value,
-        duration: visitDuration.value
-    })
-    isChangeDate.value = false
-    closeModal()
+     isApiLoading.value = true
+    try {
+            const res = await axiosInstance.put(`/visits/${props.vistId}/update`, {
+            date: newDate.value,
+            hour: newTime.value,
+            doctor_id: newDoctor.value,
+            duration: visitDuration.value
+        })
+
+        setTimeout(() => {
+            isSuccess.value = res.data?.message == 'Wizyta zaktualizowana' ? true : false
+        }, 280)
+
+        // closeModal()
+    } catch (err) {
+        console.error('Bd zmiany terminu:', err);
+    } finally {
+        setTimeout(() => {
+            isApiLoading.value = false
+        }, 250)
+        setTimeout(() => {
+            isSuccess.value = false
+        }, 1400)
+        setTimeout(() => {
+            isChangeDate.value = false
+        }, 1800)
+    }
 }
 
 const doctorOptions = computed(() =>
@@ -311,5 +353,26 @@ const dateOptions = computed(() =>
     height: 4px;
     background-color: #bababa;
     border-radius: 50%;
+}
+
+.fade-slide-confirm-enter-active,
+.fade-slide-confirm-leave-active {
+    transition: all 0.4s ease;
+}
+
+.fade-slide-confirm-leave-to {
+    opacity: 0;
+    transform: translateY(-10px);
+}
+
+.fade-slide-confirm-enter-from {
+    opacity: 0;
+    transform: translateY(10px);
+}
+
+.fade-slide-confirm-enter-to,
+.fade-slide-confirm-leave-from {
+    opacity: 1;
+    transform: translateY(0);
 }
 </style>

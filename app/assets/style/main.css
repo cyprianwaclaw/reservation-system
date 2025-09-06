@@ -541,8 +541,8 @@ p {
 
 /* icon header button */
 .icon-button {
-  width: 52px;
-  height: 52px;
+  width: 46px;
+  height: 46px;
   display: flex;
   align-items: center;
   justify-content: center;

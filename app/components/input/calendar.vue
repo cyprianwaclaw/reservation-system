@@ -2,7 +2,7 @@
     <div class="calendar-input" ref="root">
         <div class="calendar-trigger" role="button" tabindex="0" @click="toggle" @keydown.enter.prevent="toggle"
             @keydown.space.prevent="toggle" :aria-expanded="open.toString()" aria-haspopup="dialog">
-            <Icon name="ph:calendar-blank-bold" size="25" class="primary-color" />
+            <Icon name="ph:calendar" size="29" class="primary-color" />
             <span class="value text-black-own" v-if="selectedLabel">{{ selectedLabel }}</span>
         </div>
         <div v-if="open" class="calendar-popover cursor-default" role="dialog" aria-modal="false"

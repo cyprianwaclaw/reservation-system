@@ -63,6 +63,7 @@
 </template>
 
 <script setup lang="ts">
+const isApiLoading = ref(false)
 const axiosInstance = useNuxtApp().$axiosInstance as any
 
 interface Doctor {
@@ -194,6 +195,7 @@ async function book() {
     if (!selectedDate.value || !selectedPerson.value || !selectedTime.value) return
     if (!form.value.name || !form.value.surname || !form.value.phone || !form.value.email) return alert('Wypełnij wszystkie pola formularza')
 
+    isApiLoading.value = true
     try {
         await axiosInstance.post('/reserve', {
             doctor_id: selectedPerson.value,
@@ -212,16 +214,18 @@ async function book() {
             hour: selectedTime.value,
         }
 
-        // Odśwież dane z API po rezerwacji
+        // Odbwiec dane z API po rezerwacji
         await loadAvailableDays(currentYear.value, currentMonth.value)
 
-        // Reset wyborów i formularza
+        // Reset wyborcw i formularza
         selectedDate.value = null
         selectedPerson.value = null
         selectedTime.value = null
         form.value = { name: '', surname: '', phone: '', email: '' }
     } catch (error) {
-        alert('Błąd rezerwacji: ' + error)
+        alert('Bd rezerwacji: ' + error)
+    } finally {
+        isApiLoading.value = false
     }
 }
 
