@@ -195,7 +195,10 @@ const addVacation = async () => {
             }, 280)
 
             clearInputs();
-            // closeModal()
+            setTimeout(() => {
+                closeModal()
+            }, 800)
+            
         } catch (err) {
             console.error('Bd podczas dodawania wizyty:', err);
         } finally {
