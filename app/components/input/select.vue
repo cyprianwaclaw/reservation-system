@@ -8,8 +8,9 @@
             <Icon name="ph:caret-down-bold" size="20" class="close-icon transition-transform duration-300"
                 :class="{ 'rotate-180': isOpen }" />
         </div>
-        <div v-show="isOpen"
-            class="options absolute w-full max-h-48 overflow-y-auto border rounded mt-1 bg-white z-50 shadow-lg">
+        <!-- max-h-48  -->
+        <div v-show="isOpen" :class="props.type==='hour' ? ' max-h-[150px]' : ' max-h-48'"
+            class="options absolute w-full overflow-y-auto border rounded mt-1 bg-white z-50 shadow-lg">
             <div v-for="option in options" :key="option.value" class="option p-2 hover:bg-blue-100 cursor-pointer"
                 @click="selectOption(option)">
                 <p class="option-label">
@@ -32,6 +33,7 @@ const props = defineProps<{
     options: Option[];
     placeholder?: string;
     label?: string;
+    type?: string;
     disabled?: boolean;
 }>();
 

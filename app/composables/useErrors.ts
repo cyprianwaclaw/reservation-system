@@ -1,5 +1,5 @@
 
-export const errors = ref<Record<string, string[]>>({})
+export const errors = ref({}) as any
 
 export function useErrors() {
     const setErrors = (newErrors: Record<string, string[]>) => {

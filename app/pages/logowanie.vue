@@ -11,8 +11,9 @@
                     <InputBase v-model="email" name="email" placeholder="Email" />
                     <InputBase type="password" name="password" v-model="password" placeholder="Hasło" />
                 </div>
+                <LoadingButton :isLoading="isApiLoading" text="Zaloguj się" @click="login()" class="mt-[21px]" />
 
-                <button class="reserve-button mt-4" @click="login">Zaloguj się</button>
+                <!-- <button class="reserve-button mt-4" @click="login">Zaloguj się</button> -->
 
                 <div class="flex justify-end mt-5 cursor-pointer" @click="isLogin = false">
                     <p class="underline text-sm hover:text-[#959595]">
@@ -70,9 +71,13 @@ const login = async () => {
             return navigateTo('/api-week')
         }
     } catch (err: any) {
-        setErrors(err.response?.data?.errors)
+        setTimeout(() => {
+            setErrors(err.response?.data?.errors)
+        }, 360);
     } finally {
-        isApiLoading.value = false
+        setTimeout(() => {
+            isApiLoading.value = false
+        }, 320);
     }
 }
 </script>

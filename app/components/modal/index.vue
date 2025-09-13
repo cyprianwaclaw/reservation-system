@@ -14,7 +14,7 @@
                             <ModalTemplateAddPatient :vistId="data" v-if="component === 'addPatient'" />
                             <ModalTemplateAllPatient :patientId="data" v-if="component === 'allPatient'" />
                             <ModalTemplateSchedule :patientId="data" v-if="component === 'schedule'" />
-                            <ModalTemplateAddVisit :vistId="data" v-if="component === 'addVisit'" />
+                            <ModalTemplateAddVisit :visit_data="data" v-if="component === 'addVisit'" />
                             <ModalTemplateVacation :vistId="data" v-if="component === 'vacation'" />
                         </div>
                     </div>
@@ -39,7 +39,7 @@ const props = defineProps<{
 
 watch(props, (newValue: any) => {
     newValue.modalActive ? openModal() : ''
-    console.log(newValue)
+    // console.log(newValue?.data)
 })
 
 const onBefore = (el: any) => {

@@ -1,10 +1,11 @@
 <template>
+    <Modal component="addVisit" :modalActive="showNewModal" :data="data" @close="handleModalNewClose" />
     <Modal component="visit" :modalActive="showModal" :data="vistId" @close="handleModalClose" />
     <div v-if="isLoading">
         <LoadingSpinner :isLoading="true" class="-mt-[120px]" />
     </div>
-    <div class="flex place-items-center w-full justify-between px-[30px] pb-[24px] mt-[30px]"
-        :class="isLoading == true ? 'window-loading' : ''">
+    <!-- flex place-items-center w-full justify-between px-[30px] pb-[24px] mt-[30px] -->
+    <div class="api-header" :class="isLoading == true ? 'window-loading' : ''">
         <div v-if="hoverEvent && hoverPosition" class="event-tooltip"
             :class="[tooltipAbove ? 'event-tooltip--top' : '', tooltipLeft ? 'event-tooltip-arrow--left' : '']"
             :style="tooltipStyle">
@@ -24,8 +25,26 @@
             <p class="text-white">{{ hoverEvent?.notes }}</p>
         </div>
         <h1 class="font-semibold text-[32px] ml-[80px]">Planowane wizyty</h1>
-        <InputCalendar v-model="displayDate" />
-        <!-- <LoadingButton :isLoading="isApiLoading" text="Zapisz" @click="apiLoading"/> -->
+        <!-- {{ weekDays }} -->
+        <!-- {{ todayDate }} -->
+        <!-- {{ (currentTime < '21' || currentTime > '7') && isTodayInWeekDays }}
+  {{ true && false }} -->
+        <!-- {{ isTodayInWeekDays }}
+  {{ currentTimeLinePosition }} -->
+        <div v-if="isTodayInWeekDays">
+            jest
+        </div>
+        <div class="flex place-items-center gap-[15px]">
+            <InputCalendar v-model="displayDate" />
+            <div class="flex place-items-center">
+                <div class="arrow-icon" @click="scrollLeft">
+                    <Icon name="ph:caret-left-bold" size="28" />
+                </div>
+                <div class="arrow-icon" @click="scrollRight">
+                    <Icon name="ph:caret-right-bold" size="28" class="-ml-[2px]" />
+                </div>
+            </div>
+        </div>
     </div>
     <div :class="isLoading == true ? 'window-loading' : 'main-window'">
         <div class="schedule-scroll">
@@ -56,8 +75,8 @@
                         <div class="time-cell">{{ hour }}</div>
                         <template v-for="(day, di) in weekDays" :key="day.date + '-slots-' + hour">
                             <div v-for="doctor in doctors" :key="day.date + '-slot-' + doctor.id + '-' + hour"
-                                class="slot-cell" :class="{ 'alt-bg': di % 2 === 1 }"
-                                :style="{ width: columnWidth + 'px' }"></div>
+                                class="slot-cell" :class="{ 'alt-bg': di % 2 === 1 }" :style="{ width: columnWidth + 'px' }"
+                                @click="handleSlotClick($event, day, doctor, hour)"></div>
                         </template>
                     </div>
 
@@ -76,21 +95,23 @@
                         </p>
                     </div>
                 </div>
-                <div class="current-time-overlay" :style="{ top: currentTimeLinePosition + 'px' }"
-                    v-if="currentTimeLinePosition >= 0">
-                    <template v-for="(day, di) in weekDays" :key="'line-' + day.date">
-                        <template v-for="(doctor, doctorIndex) in doctors" :key="'line-' + day.date + '-' + doctor.id">
-                            <div class="current-time-line" :class="{ faded: day.date !== todayDate }" :style="{
-                                position: 'absolute',
-                                left: ((di * doctors.length + doctorIndex) * columnWidth) + 'px',
-                                width: columnWidth + 'px',
-                                height: '2px',
-                                top: '0px',
-                            }"></div>
+                <div v-if="isTodayInWeekDays">
+                    <div class="current-time-overlay" :style="{ top: currentTimeLinePosition + 'px' }"
+                        v-if="currentTimeLinePosition >= 0">
+                        <template v-for="(day, di) in weekDays" :key="'line-' + day.date">
+                            <template v-for="(doctor, doctorIndex) in doctors" :key="'line-' + day.date + '-' + doctor.id">
+                                <div class="current-time-line" :class="{ faded: day.date !== todayDate }" :style="{
+                                    position: 'absolute',
+                                    left: ((di * doctors.length + doctorIndex) * columnWidth) + 'px',
+                                    width: columnWidth + 'px',
+                                    height: '2px',
+                                    top: '0px',
+                                }"></div>
+                            </template>
                         </template>
-                    </template>
-                </div>
-                <div v-if="currentTime < '21' || currentTime > '7'">
+                    </div>
+                    <!-- <div v-if="isTodayInWeekDays"> -->
+                    <!-- <div v-if="currentTime < '21' || currentTime > '7'"> -->
                     <div v-if="currentTimeLinePosition >= 0" class="current-time-overlay" :style="{
                         top: currentTimeLinePosition + 'px',
                         left: (weekDays.findIndex((d) => d.date === todayDate) * doctors.length * columnWidth) + 'px',
@@ -114,6 +135,7 @@ import isBetweenPlugin from 'dayjs/plugin/isBetween';
 import 'dayjs/locale/pl';
 const { isModalOpen } = useCloseModal()
 
+
 dayjs.locale('pl');
 dayjs.extend(isBetweenPlugin);
 
@@ -135,8 +157,14 @@ const tooltipLeft = ref(false)
 
 const isApiLoading = ref(false)
 
+const { schedule, fetchSchedule } = useSchedule(axiosInstance)
+
+onMounted(async () => {
+    await fetchSchedule()
+})
+
 const apiLoading = () => {
-        isApiLoading.value = true
+    isApiLoading.value = true
     setTimeout(() => {
         isApiLoading.value = false
     }, 700)
@@ -166,31 +194,34 @@ const tooltipStyle = computed(() => {
 
 
 function onEventHover(ev: MouseEvent, event: any) {
-    const target = ev.currentTarget as HTMLElement; // currentTarget zamiast target
-    const rect = target.getBoundingClientRect();
-    const tooltipWidth = 300;
-    const tooltipHeight = 220;
-    const margin = 10;
+    if (event.type === 'visit') {
+        console.log(event)
+        const target = ev.currentTarget as HTMLElement; // currentTarget zamiast target
+        const rect = target.getBoundingClientRect();
+        const tooltipWidth = 300;
+        const tooltipHeight = 220;
+        const margin = 10;
 
-    let x = rect.right + margin + window.scrollX;
-    let y = rect.top + window.scrollY;
+        let x = rect.right + margin + window.scrollX;
+        let y = rect.top + window.scrollY;
 
-    let showLeft = false;
-    let showAbove = false;
+        let showLeft = false;
+        let showAbove = false;
 
-    if (window.innerWidth < x + tooltipWidth) {
-        x = rect.left - tooltipWidth - margin + window.scrollX;
-        showLeft = true;
+        if (window.innerWidth < x + tooltipWidth) {
+            x = rect.left - tooltipWidth - margin + window.scrollX;
+            showLeft = true;
+        }
+        if (window.innerHeight < y + tooltipHeight) {
+            y = rect.bottom - tooltipHeight - margin + window.scrollY; // używamy rect.bottom
+            showAbove = true;
+        }
+
+        hoverPosition.value = { x, y };
+        tooltipAbove.value = showAbove;
+        tooltipLeft.value = showLeft;
+        hoverEvent.value = event;
     }
-    if (window.innerHeight < y + tooltipHeight) {
-        y = rect.bottom - tooltipHeight - margin + window.scrollY; // używamy rect.bottom
-        showAbove = true;
-    }
-
-    hoverPosition.value = { x, y };
-    tooltipAbove.value = showAbove;
-    tooltipLeft.value = showLeft;
-    hoverEvent.value = event;
 }
 
 function clearHover() {
@@ -204,12 +235,11 @@ watch(isModalOpen, async (newValue: any) => {
     }
 })
 
-
 const doctors = [
-    { id: 1, name: 'Michał' },
-    { id: 2, name: 'Grzegorz' },
-    { id: 3, name: 'Ola' },
-    { id: 4, name: 'Asia' },
+    { id: 1, name: 'Michał', surname: 'Test' },
+    { id: 2, name: 'Grzegorz', surname: 'Test' },
+    { id: 3, name: 'Ola', surname: 'Test' },
+    { id: 4, name: 'Asia', surname: 'Test' },
 ];
 
 const today = dayjs();
@@ -250,12 +280,13 @@ async function fetchData() {
     const range = weekRange.value;
     const resVisits = await axiosInstance.get(`/schedule/all-visits?week=${encodeURIComponent(range)}`);
     visits.value = resVisits.data;
-    console.log(visits.value)
+    // console.log(visits.value)
     const resVacations = await axiosInstance.get(`/vacations?week=${encodeURIComponent(range)}`);
     vacations.value = resVacations.data;
 }
 
 const showModal = ref(false);
+const showNewModal = ref(false);
 const vistId = ref() as any
 
 function onEventClick(event: any) {
@@ -270,6 +301,19 @@ function onEventClick(event: any) {
 const handleModalClose = () => {
     showModal.value = false;
 };
+
+const handleModalNewClose = () => {
+    showNewModal.value = false;
+};
+
+// function onEventClick(event: any) {
+//     hoverEvent.value = null
+//     hoverPosition.value = null
+//     if (event.type === 'visit') {
+//         vistId.value = event.id;
+//         showModal.value = !showModal.value;
+//     }
+// }
 
 function setWeekStartFromCookieOrToday() {
     if (currentWeekCookie.value) {
@@ -400,17 +444,17 @@ function getSubHeaderHeight(): number {
 
 const scheduleScrollEl = ref<HTMLElement | null>(null);
 
-function onWheelScroll(e: WheelEvent) {
-    if (!scheduleScrollEl.value) return;
-    const target = e.target as HTMLElement;
-    if (target.closest('.time-cell') || target.closest('.time-col-test')) {
-        return;
-    }
-    if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
-        e.preventDefault();
-        scheduleScrollEl.value.scrollLeft += e.deltaY;
-    }
-}
+// function onWheelScroll(e: WheelEvent) {
+//     if (!scheduleScrollEl.value) return;
+//     const target = e.target as HTMLElement;
+//     if (target.closest('.time-cell') || target.closest('.time-col-test')) {
+//         return;
+//     }
+//     if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+//         e.preventDefault();
+//         scheduleScrollEl.value.scrollLeft += e.deltaY;
+//     }
+// }
 let interval: any = null;
 
 const centerDay = ref(null) as any
@@ -454,19 +498,19 @@ onMounted(async () => {
         }, 50);
     }
 
-    scheduleScrollEl.value?.addEventListener('wheel', onWheelScroll, { passive: false });
+    // scheduleScrollEl.value?.addEventListener('wheel', onWheelScroll, { passive: false });
     scheduleScrollEl.value?.addEventListener("scroll", updateCenterDay);
     updateCurrentTime();
     interval = setInterval(updateCurrentTime, 100);
     setTimeout(() => {
         isLoading.value = false;
-    }, 900)
+    }, 1500)
 });
 
 
 onBeforeUnmount(() => {
     if (interval) clearInterval(interval);
-    scheduleScrollEl.value?.removeEventListener('wheel', onWheelScroll);
+    // scheduleScrollEl.value?.removeEventListener('wheel', onWheelScroll);
     scheduleScrollEl.value?.removeEventListener('scroll', updateCenterDay);
 });
 
@@ -531,7 +575,7 @@ function onDateChange() {
     if (!chosen.isValid()) return;
     // log tylko dla ręcznej zmiany
     if (userSelectedDate.value !== selectedDate.value) {
-        console.log('now data', selectedDate.value);
+        // console.log('now data', selectedDate.value);
     }
     weekStart.value = chosen.startOf("day");
     saveWeekStartToCookie();
@@ -560,30 +604,103 @@ watch(centerDay, (val) => {
         selectedDate.value = val.date;
     }
 })
+
+
+const slotHeight = 60; // px = 60 minut (dopasuj do swojego CSS)
+const data = ref([]) as any;
+
+function handleSlotClick(event: MouseEvent, day: any, doctor: any, baseHour: string) {
+    const rect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const clickY = event.clientY - rect.top;
+
+    let minutes = Math.floor((clickY / slotHeight) * 60);
+    minutes = Math.round(minutes / 15) * 15;
+    if (minutes >= 60) minutes = 45;
+
+    const [h, m] = baseHour.split(":").map(Number);
+    const date = new Date(`${day.date}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00`);
+    date.setMinutes(date.getMinutes() + minutes);
+
+    if (date <= new Date()) {
+        return;
+    }
+
+    const timeString = date.toTimeString().slice(0, 5);
+
+    const item = {
+        date: day.date,
+        time: timeString,
+        doctorId: doctor.id,
+        doctorName: doctor.name,
+        doctorSurname: doctor.surname,
+    };
+    data.value = [item];
+
+    showNewModal.value = true;
+}
+
+
+const scrollAmount = 1000; // px do przesunięcia
+
+function scrollLeft() {
+    if (!scheduleScrollEl.value) return;
+    scheduleScrollEl.value.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+}
+
+function scrollRight() {
+    if (!scheduleScrollEl.value) return;
+    scheduleScrollEl.value.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+}
+
+
+// const isTodayInWeekDays = computed(() => {
+//     console.log("Dzisiejsza data:", todayDate)
+//     console.log("Lista weekDays:", weekDays.value)
+
+//     const result = weekDays.value.some(day => day.date === todayDate)
+
+//     console.log("Czy todayDate jest w weekDays? =>", result)
+//     return result
+// })
+
+const isTodayInWeekDays = computed(() => {
+    console.log("Dzisiejsza data:", todayDate)
+    console.log("Lista weekDays:", weekDays.value)
+
+    const todayExists = weekDays.value.some(day => day.date === todayDate)
+    const currentHour = new Date().getHours()
+    const isWithinHours = currentHour >= 7 && currentHour < 21
+
+    console.log("Czy todayDate jest w weekDays? =>", todayExists)
+    console.log("Aktualna godzina:", currentHour, "Czy jest między 7-21? =>", isWithinHours)
+
+    return todayExists && isWithinHours
+})
+
 </script>
 
 <style scoped>
 /* Michał */
 .event.doctor-1 {
-    background-color: #27a4709e !important;
+    background-color: #27a4709e;
     /* czerwony */
 }
 
 /* Grzegorz*/
 .event.doctor-2 {
-    background-color: #bf6b118f !important;
+    background-color: #bf6b118f;
     /* niebieski */
 }
 
 /* Ola */
 .event.doctor-3 {
-    background-color: #9f1edb76 !important;
+    background-color: #9f1edb76;
     /* zielony */
 }
 
 /* Asia */
 .event.doctor-4 {
-    background-color: #f507dd6f !important;
+    background-color: #f507dd6f;
     /* żółty */
 }
 
@@ -632,6 +749,16 @@ watch(centerDay, (val) => {
     line-height: 1.4;
     display: flex;
     flex-direction: column;
+}
 
+
+
+.arrow-icon {
+    color: #31a9ce80;
+}
+
+.arrow-icon:hover {
+    color: #2ea0c2;
+    cursor: pointer;
 }
 </style>

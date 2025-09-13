@@ -177,14 +177,25 @@ p {
   font-weight: 700;
   color: #31a9ce !important;
 }
-
+.api-header {
+  height: 15vh;
+  display: flex;
+  width: 100%;
+  justify-content: between;
+  place-items: center;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 30px;
+  /* margin-bottom: -12px */
+}
 .schedule-scroll {
   width: 100vw;
   max-width: 100vw;
   overflow-x: auto !important;
-  overflow-y: hidden;
+  overflow-y: auto !important;
   background: #fafafa;
-  min-height: 400px;
+  /* min-height: 400px; */
+  height: 85vh;
 }
 
 .schedule-scroll::-webkit-scrollbar {
@@ -212,23 +223,31 @@ p {
 
 .header-row,
 .subheader-row {
+  position: sticky;
   display: flex;
   width: 100%;
+  background: white;
 }
 
 .header-row {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 999;
+  z-index: 50;
   background: white;
 }
 
 .subheader-row {
-  display: flex;
+  top: 50px;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  background: white;
+
+  /* display: flex;
   position: sticky;
-  top: 30px;
-  background: #fff;
+  top: 50px;
+  background: #fff; */
 }
 
 .time-col-test,
@@ -278,6 +297,8 @@ p {
 }
 
 .doctor-col {
+  /* position: sticky;
+  z-index:999 !important; */
   width: 100px;
   min-width: 100px;
   max-width: 100px;
@@ -332,13 +353,12 @@ p {
   border-bottom: 1px solid #eee;
   position: relative;
   height: 50px;
-  background: #fff;
+  /* background: #fff; */
 }
 
 .alt-bg {
   background: #84cfe621;
-  /* background: white; */
-
+  /* background: #bcbcbc; */
 }
 
 .events-layer {
@@ -350,9 +370,9 @@ p {
   z-index: 10;
 }
 
-.event-past {
+/* .event-past {
   background: #31a9ce35 !important;
-  /* border: 1px solid #31a9ce6d; */
+border: 1px solid #31a9ce6d;
   color: #31a9ce !important;
 }
 .event-past.vacation {
@@ -361,10 +381,10 @@ p {
   border: 1px solid #82828238;
   user-select: none !important;
   cursor: default !important;
-}
+} 
 .event-future {
   opacity: 1;
-}
+} */
 
 .event {
   position: absolute;
@@ -388,12 +408,11 @@ p {
 .event.visit {
   background: #31a9ce;
   border-radius: 8px !important;
-
 }
 
 .event.vacation {
   border-radius: 0px !important;
-  background-color: #d2d2d2b6;
+  background-color: #d2d2d2b6 !important;
   user-select: none !important;
   cursor: default !important;
 }
@@ -443,7 +462,6 @@ p {
   justify-content: center;
   align-items: center;
 }
-
 
 /* close icon */
 .close-icon {

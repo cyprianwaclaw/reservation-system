@@ -53,19 +53,23 @@
 
             <!-- Blok potwierdzenia zmiany daty -->
             <div v-if="isChangeDate" class="change-date-container">
-                <div class="w-full flex justify-between mb-[6px]">
-                    <p class="flex font-semibold text-[17px] -mt-[6px]">Zmień termin wizyty</p>
-                    <Icon name="carbon:close" size="32" class="close-icon -mt-[12px] -mr-[10px]"
+                <div class="w-full flex justify-between mb-[15px]">
+                    <p class="flex font-semibold text-[21px] -mt-[6px]">Zmień termin wizyty</p>
+                    <Icon name="carbon:close" size="38" class="close-icon -mt-[12px] -mr-[10px]"
                         @click="isChangeDate = false" />
                 </div>
                 <!-- Data -->
-                <InputSelect v-model="newDate" :options="dateOptions" placeholder="Wybierz datę" />
-                <InputSelect v-model="newDoctor" :options="doctorOptions" placeholder="Wybierz lekarza"
-                    :disabled="newDate ? false : true" />
-                <InputSelect v-model="newTime" :options="timeOptions" placeholder="Wybierz godzinę"
-                    :disabled="newDoctor ? false : true" />
+                 <div class="flex flex-col gap-[10px]">
+                <InputTest v-model="selectedDate" :available-days="schedule" @select-day="handleSelectDay" />
+
+                     <!-- <InputSelect v-model="newDate" :options="dateOptions" placeholder="Wybierz datę" /> -->
+                     <InputSelect v-model="newDoctor" :options="doctorOptions" placeholder="Wybierz lekarza"
+                     :disabled="newDate ? false : true" />
+                     <InputSelect type='hour' v-model="newTime" :options="timeOptions" placeholder="Wybierz godzinę"
+                     :disabled="newDoctor ? false : true" />
+                    </div>
                 <!-- Przyciski -->
-                <div class="flex mt-[10px]">
+                <div class="absolute bottom-[40px]">
                                         <div class="flex gap-[15px]">
                                             <LoadingButton :isLoading="isApiLoading" text="Gotowe" @click="confirmChangeDate()" />
                                             <Transition name="fade-slide-confirm">
@@ -120,6 +124,10 @@
 const isApiLoading = ref(false)
 const { closeModal } = useCloseModal()
 const axiosInstance = useNuxtApp().$axiosInstance as any;
+const { schedule, fetchSchedule } = useSchedule(axiosInstance)
+
+
+// const {   errors, setErrors, } = useErrors()
 
 const isSuccess = ref()
 
@@ -133,7 +141,8 @@ const props = defineProps({
 const newDate = ref('')
 const newDoctor = ref(null as null | number)
 const newTime = ref('')
-const schedule = ref([]) as any
+const scheduleApi = ref([]) as any
+const selectedDate = ref(null)
 const visitData = ref([]) as any
 const newNote = ref<string>('')
 const fastNote = ref<string>('')
@@ -175,18 +184,17 @@ const addNote = async () => {
 
 const addFastNote = async () => {
     if (fastNote.value.length > 3) {
-        isApiLoading.value = true
-        try {
+
             const newFastNoteRes = await axiosInstance.post(`/visits/${props.vistId}/notes`, {
                 'text': fastNote.value,
                 "is_edit": true,
             })
             const res = await axiosInstance.get(`/schedule/visits/${props.vistId}`)
             visitData.value = res.data
-        } finally {
-            isApiLoading.value = false
-        }
-    }
+        setTimeout(() => {
+            closeModal()
+        }, 2100)
+}
 }
 
 const confirmDelete = async () => {
@@ -200,11 +208,11 @@ const openChangeDate = async () => {
     newTime.value = ''
     isChangeDate.value = true
     const res = await axiosInstance.get('/available-days')
-    schedule.value = res.data
+    scheduleApi.value = res.data
 }
 
 const doctorsForSelectedDate = computed(() => {
-    const day = schedule.value.find((d: any) => d.date === newDate.value)
+    const day = scheduleApi.value.find((d: any) => d.date === newDate.value)
     return day ? day.doctors : []
 })
 
@@ -228,8 +236,9 @@ const confirmChangeDate = async () => {
         setTimeout(() => {
             isSuccess.value = res.data?.message == 'Wizyta zaktualizowana' ? true : false
         }, 280)
-
-        // closeModal()
+        setTimeout(() => { 
+            closeModal()
+        }, 2100)
     } catch (err) {
         console.error('Bd zmiany terminu:', err);
     } finally {
@@ -270,11 +279,38 @@ function formatDateDDMMYYYY(dateStr: string) {
 
 // Computed dla opcji select
 const dateOptions = computed(() =>
-    schedule.value.map((item: any) => ({
+    scheduleApi.value.map((item: any) => ({
         value: item.date,
         label: formatDateDDMMYYYY(item.date),
     }))
 );
+function findClosestTime(time, options) {
+    if (!time || options.length === 0) return options[0]?.value || ''
+    const [h, m] = time.split(':').map(Number)
+    let closest = options[0].value
+    let minDiff = Math.abs(h * 60 + m - (() => { const [hh, mm] = closest.split(':').map(Number); return hh * 60 + mm })())
+    options.forEach(opt => {
+        const [hh, mm] = opt.value.split(':').map(Number)
+        const diff = Math.abs(h * 60 + m - (hh * 60 + mm))
+        if (diff < minDiff) { minDiff = diff; closest = opt.value }
+    })
+    return closest
+}
+
+function handleSelectDay(payload) {
+    selectedDate.value = payload.date
+    newDate.value = payload.date
+    if (payload.doctors.length === 1) {
+        newDoctor.value = payload.doctors[0].doctor_id
+        if (payload.doctors[0].free_slots?.length) {
+            const opts = payload.doctors[0].free_slots.map(t => ({ value: t }))
+            newTime.value = findClosestTime('', opts)
+        }
+    } else {
+        newDoctor.value = null
+        newTime.value = ''
+    }
+}
 
 </script>
 
@@ -305,15 +341,16 @@ const dateOptions = computed(() =>
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    padding: 34px;
+    padding: 38px;
     background-color: #ffffff;
     border-radius: 10px;
     border: 1px solid #e6e9ef;
     box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
     position: absolute;
-    bottom: 0;
-    width: 400px;
-    height: 324px
+    bottom: -10px;
+    left: -10px;
+    width: 430px;
+    height: 540px
 }
 
 /* tło do modala */

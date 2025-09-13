@@ -163,7 +163,7 @@ const selectedLabel = computed(() => (selected.value ? selected.value.format(for
     align-items: center;
     gap: 6px;
     min-width: 120px;
-    padding: 10px 15px;
+    padding: 9px 14px;
     border-radius: 999px;
     border: 1px solid #31a9ce9f;
     cursor: pointer;
