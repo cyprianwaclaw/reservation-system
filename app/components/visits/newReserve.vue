@@ -1,14 +1,19 @@
 <template>
     <div class="calendar w-[450px] select-none">
         <Transition name="fade-slide">
-            <div v-if="isConfirmed" class="confirmation mt-[60px]">
-                <SuccessCheck />
-                <p class="text-[28px] font-semibold">
+            <div v-if="isConfirmed" class="confirmation md:mt-[60px]">
+                <!-- <div v-if="true" class="confirmation md:mt-[60px]"> -->
+                <div class="w-[57px] md:w-full -mb-[12px] md:mb-[0px]">
+                    <SuccessCheck />
+                </div>
+                <p class="md:text-[28px] text-[21px] font-semibold">
                     Zarezerwowano wizytę!
                 </p>
                 <div class="flex flex-col">
-                    <p class="mt-[8px] text-[17px]">
-                        Dzień dobry <span class="primary-color font-semibold underline">{{ confirmed?.name }}</span>, <br>
+                    <p class="mt-[12px] text-[17px] md:mt-[8px]">
+                        Dzień dobry <span class="primary-color font-semibold underline">{{ confirmed?.name }}</span>,
+                    </p>
+                    <p class="md:mt-[8px] mt-[5px] text-[17px]">
                         dziękujemy za umówienie wizyty w naszym gabinecie.
                         Dzień przed wizytą otrzymasz e-maila oraz SMS z przypomnieniem
                     </p>
@@ -40,9 +45,9 @@
                     To szybkie i wygodne, wystarczy kilka kliknięć
                 </p>
                 <p class="flex md:hidden text-[16px]  text-gray-600 mb-[24px]">
-                        Wybierz dogodny dla siebie termin z kalendarza poniżej i zarezerwuj wizytę online.
-                        To szybkie i wygodne, wystarczy kilka kliknięć
-                    </p>
+                    Wybierz dogodny dla siebie termin z kalendarza poniżej i zarezerwuj wizytę online.
+                    To szybkie i wygodne, wystarczy kilka kliknięć
+                </p>
                 <!-- {{  }} -->
                 <!-- Kalendarz -->
                 <div class="md:w-[370px] w-[340px] border-calendar md:mt-[44px] mt-[32px] p-[25px]">
@@ -373,7 +378,7 @@ async function book() {
             setErrors(err.response.data.errors);
         }
     } finally {
-        setTimeout(() =>{  
+        setTimeout(() => {
             isApiLoading.value = false
         }, 250)
     }
@@ -583,23 +588,25 @@ watch(confirmed, async (val) => {
 .person:hover {
     background: #29afd81d;
 }
+
 @media (max-width: 768px) {
 
-h3 {
-    font-size: 16px;
-    font-weight: 600;
-    margin-top: 36px;
-    margin-bottom: 12px;
+    h3 {
+        font-size: 16px;
+        font-weight: 600;
+        margin-top: 36px;
+        margin-bottom: 12px;
+    }
 }
-}
+
 @media (min-width: 768px) {
 
-h3 {
-    font-size: 17px;
-    font-weight: 600;
-    margin-top: 45px;
-    margin-bottom: 13px;
-}
+    h3 {
+        font-size: 17px;
+        font-weight: 600;
+        margin-top: 45px;
+        margin-bottom: 13px;
+    }
 }
 
 .border-calendar {
@@ -627,5 +634,4 @@ h3 {
     opacity: 1;
     transform: translateY(0);
 }
-
 </style>

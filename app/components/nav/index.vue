@@ -1,5 +1,5 @@
 <template>
-    <Modal component="" :modalActive="isOpenMenu" @close="handleModal('')"/>
+    <Modal component="" :modalActive="isOpenMenu" @close="handleModal('')" />
     <Modal :component="modalName" :modalActive="showModal" @close="handleModal('allPatient')" />
     <div v-if="router.currentRoute.value?.name !== 'logowanie' && !isLoading">
         <div v-if="router.currentRoute.value?.name === 'api-week' && !isLoading"
