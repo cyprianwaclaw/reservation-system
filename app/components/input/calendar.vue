@@ -2,8 +2,8 @@
     <div class="calendar-input" ref="root">
         <div class="calendar-trigger" role="button" tabindex="0" @click="toggle" @keydown.enter.prevent="toggle"
             @keydown.space.prevent="toggle" :aria-expanded="open.toString()" aria-haspopup="dialog">
-            <Icon name="ph:calendar" size="29" class="primary-color" />
-            <span class="value text-black-own" v-if="selectedLabel">{{ selectedLabel }}</span>
+            <Icon name="ph:calendar" class="primary-color text-[30px]" />
+            <span class="value text-black-own md:flex hidden" v-if="selectedLabel">{{ selectedLabel }}</span>
         </div>
         <div v-if="open" class="calendar-popover cursor-default" role="dialog" aria-modal="false"
             :aria-label="'Wybór daty'">
@@ -12,10 +12,10 @@
                 <div class="month-label">{{ currentMonth.format('MMMM YYYY') }}</div>
                 <button class="nav-btn" @click="nextMonth" aria-label="Następny miesiąc">›</button>
             </div>
-            <div class="weekday-row">
+            <div class="weekday-row  mt-[12px]">
                 <div v-for="d in weekdays" :key="d" class="weekday-cell">{{ d }}</div>
             </div>
-            <div class="days-grid" role="grid">
+            <div class="days-grid mt-[12px]" role="grid">
                 <button v-for="day in days" :key="day.key" class="day-cell" :class="{
                     'other-month': !day.inMonth,
                     today: day.isToday,
@@ -157,6 +157,7 @@ const selectedLabel = computed(() => (selected.value ? selected.value.format(for
     position: relative;
     display: inline-block;
 }
+@media (min-width: 768px) {
 
 .calendar-trigger {
     display: flex;
@@ -169,20 +170,9 @@ const selectedLabel = computed(() => (selected.value ? selected.value.format(for
     cursor: pointer;
     transition: all 0.3s;
 }
-
 .calendar-trigger:hover {
     background: #29afd81d;
 }
-
-.calendar-trigger:focus {
-    outline: none;
-}
-
-.value {
-    width: 87px;
-    font-weight: 500;
-}
-
 .calendar-popover {
     position: absolute;
     left: -176px;
@@ -195,6 +185,77 @@ const selectedLabel = computed(() => (selected.value ? selected.value.format(for
     padding: 12px;
     z-index: 9999;
 }
+.day-cell {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+}
+}
+
+@media (max-width: 768px) {
+
+.calendar-trigger {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+.calendar-trigger:hover {
+    background: white;
+}
+.calendar-popover {
+    position: absolute;
+    left: -315px;
+    margin-top: 6px;
+    width: 350px;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #e6e9ef;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
+    padding: 12px;
+    z-index: 9999;
+}
+.day-cell {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+}
+}
+
+.calendar-trigger:focus {
+    outline: none;
+}
+
+.value {
+    width: 87px;
+    font-weight: 500;
+}
+
+/* .calendar-popover {
+    position: absolute;
+    left: -176px;
+    margin-top: 8px;
+    width: 330px;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #e6e9ef;
+    box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
+    padding: 12px;
+    z-index: 9999;
+} */
 
 .calendar-header {
     display: flex;
@@ -241,7 +302,7 @@ const selectedLabel = computed(() => (selected.value ? selected.value.format(for
     gap: 6px;
 }
 
-.day-cell {
+/* .day-cell {
     width: 36px;
     height: 36px;
     border-radius: 999px;
@@ -252,7 +313,7 @@ const selectedLabel = computed(() => (selected.value ? selected.value.format(for
     align-items: center;
     justify-content: center;
     font-weight: 500;
-}
+} */
 
 .day-cell:hover {
     background: #29afd81d;

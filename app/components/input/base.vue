@@ -179,10 +179,17 @@ watch(
     outline: none;
     border: 2px solid #31a9ce;
 }
-
+@media (max-width: 768px) {
+ .base-input::placeholder {
+    color: #9e9e9e;
+    font-size: 16px;
+} 
+}
+@media (min-width: 768px) {
 .base-input::placeholder {
     color: #cacaca;
     font-size: 16px;
+}
 }
 
 /* poprawione */

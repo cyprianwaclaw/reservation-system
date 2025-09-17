@@ -1,11 +1,12 @@
 <template>
     <div class="w-full">
-        <p class="text-[32px] font-semibold -mt-[8px] mb-[25px]">Dodaj wizytę</p>
-        <div class="flex w-full gap-[50px]">
+        <p class="modal-title">Dodaj wizytę</p>
+        <!-- <p class="text-[32px] font-semibold -mt-[8px] mb-[25px]">Dodaj wizytę</p> -->
+        <div class="flex md:flex-row flex-col w-full md:gap-[50px] gap-[12px] mobile-style">
             <div class="w-full relative select-none h-[450px]">
-                <p class="text-[16px] font-semibold primary-color mb-[8px]">Usługa</p>
+                <p class="md:text-[16px] text-[14px] md:mb-[8px] mb-[4px] font-semibold primary-color">Usługa</p>
                 <InputSelect v-model="visitType" :options="visitTypeOptions" placeholder="Wybierz usługę" />
-                <p class="text-[16px] font-semibold primary-color mb-[8px] mt-[21px]">Pacjent</p>
+                <p class="md:text-[16px] text-[14px] md:mb-[8px] mb-[4px] font-semibold primary-color mt-[21px]">Pacjent</p>
                 <InputSearchSelect :key="selectPatientKey" v-model="selectPatient" :options="options"
                     placeholder="Szukaj pacjenta..." @search="onSearch" />
                 <div class="w-full flex place-items-center justify-between mt-[12px] mb-[16px]">
@@ -19,7 +20,7 @@
                     </p>
                 </div>
                 <Transition name="fade-slide">
-                    <div class="w-full flex flex-col gap-[10px]" v-if="showPatientInputs">
+                    <div class="w-full flex flex-col gap-[10px] mb-[16px]" v-if="showPatientInputs">
                         <div class="w-full flex flex-row gap-[10px]">
                             <InputBase v-model="firstName" name="name" placeholder="Imię" :disabled="!!selectPatient" />
                             <InputBase v-model="surName" name="surname" placeholder="Nazwisko"
@@ -31,13 +32,14 @@
                 </Transition>
             </div>
             <div class="w-full flex flex-col gap-[10px]">
-                <p class="text-[16px] font-semibold primary-color">Data wizyty</p>
+                <p class="md:text-[16px] text-[14px] md:mb-[8px] -mb-[2px] font-semibold primary-color">Data wizyty</p>
                 <InputTest v-model="selectedDate" :available-days="schedule" @select-day="handleSelectDay" />
                 <InputSelect v-model="newDoctor" :options="doctorOptions" placeholder="Wybierz lekarza"
                     :disabled="!selectedDate" />
                 <InputSelect type='hour' v-model="newTime" :options="timeOptions" placeholder="Wybierz godzinę"
                     :disabled="!newDoctor" />
-                <div class="absolute bottom-[30px] right-[40px] flex gap-[15px]">
+                <div class="md:absolute bottom-[30px] right-[40px] flex gap-[15px] md:mt-0 mt-[21px] mb-[74px] md:mb-[0px]">
+
                     <Transition name="fade-slide-confirm">
                         <div v-if="errors?.email" class="flex place-items-center gap-[5px]">
                             <Icon name="ph:warning" size="25" class="text-[#f43737]" />

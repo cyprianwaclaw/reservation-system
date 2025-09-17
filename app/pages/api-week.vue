@@ -24,19 +24,17 @@
             <p class="text-white font-semibold text-[13px]  mt-[12px]">Ostatnia wizyta</p>
             <p class="text-white">{{ hoverEvent?.notes }}</p>
         </div>
-        <h1 class="font-semibold text-[32px] ml-[80px]">Planowane wizyty</h1>
+        <h1 class="font-semibold md:text-[32px] text-[25px] md:ml-[80px]">Grafik</h1>
         <!-- {{ weekDays }} -->
         <!-- {{ todayDate }} -->
         <!-- {{ (currentTime < '21' || currentTime > '7') && isTodayInWeekDays }}
   {{ true && false }} -->
         <!-- {{ isTodayInWeekDays }}
   {{ currentTimeLinePosition }} -->
-        <div v-if="isTodayInWeekDays">
-            jest
-        </div>
+  <!-- <InputCalendar v-model="displayDate" class="absolute"/> -->
         <div class="flex place-items-center gap-[15px]">
-            <InputCalendar v-model="displayDate" />
-            <div class="flex place-items-center">
+            <InputCalendar v-model="displayDate"/>
+            <div class="md:flex hidden place-items-center">
                 <div class="arrow-icon" @click="scrollLeft">
                     <Icon name="ph:caret-left-bold" size="28" />
                 </div>

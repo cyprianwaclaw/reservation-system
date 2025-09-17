@@ -1,7 +1,7 @@
 <template>
     <div class="w-full">
-        <p class="text-[32px] font-semibold -mt-[8px] mb-[22px]">Pacjenci</p>
-        <div class="flex w-full gap-[54px]">
+        <p class="modal-title">Pacjenci</p>
+        <div class="flex w-full flex-col md:flex-row gap-[54px] mobile-style">
             <div class="w-full relative select-none">
                 <div class="flex relative">
                     <Icon name="ph:magnifying-glass" size="28" class="text-[#cacaca] absolute top-[10px] left-[13px]" />
@@ -258,7 +258,7 @@ const fetchPatient = async () => {
     } finally {
         setTimeout(() => {
             loading.value = false;
-        }, 200);
+        }, 300);
     }
 };
 
@@ -367,7 +367,7 @@ const updatePatient = async () => {
             isSuccess.value = false;
         }, 1200);
 
-        setTimeout(async() => {
+        setTimeout(async () => {
             isEdit.value = false
             // Odświeżamy pełną listę pacjentów
             const currentUserId = singleUser.value?.id;
@@ -375,7 +375,7 @@ const updatePatient = async () => {
             offset = 0;
             allLoaded = false;
             await fetchPatient();
-    
+
             // Po pobraniu listy, ponownie pobieramy aktualnego pacjenta
             if (currentUserId) {
                 await fetchSingleUser(currentUserId);
@@ -395,26 +395,26 @@ const updatePatient = async () => {
 }
 
 
-    onMounted(() => {
-        fetchPatient()
+onMounted(() => {
+    fetchPatient()
 
-        if (props.patientId) {
-            fetchSingleUser(props.patientId)
-        }
+    if (props.patientId) {
+        fetchSingleUser(props.patientId)
+    }
 
-        if (!containerRef.value) return;
+    if (!containerRef.value) return;
 
-        containerRef.value.addEventListener('scroll', () => {
-            if (loading.value || allLoaded) return;
+    containerRef.value.addEventListener('scroll', () => {
+        if (loading.value || allLoaded) return;
 
-            if (containerRef.value) {
-                const { scrollTop, scrollHeight, clientHeight } = containerRef.value;
-                if (scrollTop + clientHeight >= scrollHeight - 100) {
-                    fetchPatient();
-                }
+        if (containerRef.value) {
+            const { scrollTop, scrollHeight, clientHeight } = containerRef.value;
+            if (scrollTop + clientHeight >= scrollHeight - 100) {
+                fetchPatient();
             }
-        });
+        }
     });
+});
 </script>
 
 <style scoped>
@@ -428,15 +428,86 @@ const updatePatient = async () => {
     border-radius: 10px;
 }
 
-.letter-row {
-    z-index: 10;
-    top: 0;
-    width: 100%;
-    background: #31a9ce;
-    border-radius: 8px;
-    color: white;
-    padding: 10px 16px;
-    font-size: 18px;
+@media (max-width: 768px) {
+
+    .letter-row {
+        z-index: 10;
+        top: 0;
+        width: 100%;
+        background: #31a9ce;
+        border-radius: 8px;
+        color: white;
+        padding: 10px 14px;
+        font-size: 17px;
+    }
+
+    .non-active-user {
+        color: #322929;
+        font-weight: 400;
+        font-size: 17px;
+        padding: 10px 0px;
+        border-radius: 10px;
+    }
+
+    .spinner-overlay {
+        position: fixed;
+        margin-top: 0px;
+        border-radius: 24px 24px 0 0;
+        left: 0px;
+        width: 100%;
+        height: 510px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        background-color: rgba(255, 255, 255, 0.7);
+    }
+
+    .serach-input::placeholder {
+        color: #9e9e9e;
+        font-family: 'Public Sans', sans-serif;
+        font-size: 16px;
+    }
+}
+
+@media (min-width: 768px) {
+    .letter-row {
+        z-index: 10;
+        top: 0; 
+        width: 100%;
+        background: #31a9ce;
+        border-radius: 8px;
+        color: white;
+        padding: 10px 16px;
+        font-size: 18px;
+    }
+
+    .non-active-user {
+        color: #322929;
+        font-weight: 400;
+        font-size: 17px;
+        padding: 11px 14px;
+        border-radius: 10px;
+    }
+
+    .spinner-overlay {
+        position: fixed;
+        top: 165px;
+        left: 40px;
+        width: 425px;
+        height: 390px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        background-color: rgba(255, 255, 255, 0.7);
+    }
+
+    .serach-input::placeholder {
+        color: #cacaca;
+        font-family: 'Public Sans', sans-serif;
+        font-size: 16px;
+    }
 }
 
 .patient-row {
@@ -460,19 +531,6 @@ const updatePatient = async () => {
     border: 2px solid #31a9ce;
 }
 
-.serach-input::placeholder {
-    color: #cacaca;
-    font-family: 'Public Sans', sans-serif;
-    font-size: 16px;
-}
-
-.non-active-user {
-    color: #322929;
-    font-weight: 400;
-    font-size: 17px;
-    padding: 11px 14px;
-    border-radius: 10px;
-}
 
 .active-user {
     padding: 11px 14px;
@@ -486,20 +544,6 @@ const updatePatient = async () => {
     padding: 11px 14px;
     border-radius: 10px;
     background-color: #e0f2fe;
-}
-
-/* Pulse loader overlay */
-.spinner-overlay {
-    position: fixed;
-    top: 165px;
-    left: 40px;
-    width: 405px;
-    height: 390px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-    background-color: rgba(255, 255, 255, 0.7);
 }
 
 .pulse-loader {
@@ -584,5 +628,4 @@ const updatePatient = async () => {
 .fade-slide-leave-from {
     opacity: 1;
     transform: translateY(0);
-}
-</style>
+}</style>

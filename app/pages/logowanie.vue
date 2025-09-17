@@ -2,7 +2,7 @@
     <div class="auth-background" @click="resetErrors()">
         <div class="form-container">
             <div v-if="isLogin">
-                <p class="text-[36px] font-semibold mb-[16px]">Logowanie</p>
+                <p class="md:text-[36px] text-[27px] font-semibold mb-[16px]">Logowanie</p>
                 <div v-if="errors.message" class="text-red-600 flex items-center gap-[4px] mb-4">
                     <Icon name="ph:warning-circle" size="25" />
                     <p>{{ errors.message }}</p>
@@ -11,15 +11,12 @@
                     <InputBase v-model="email" name="email" placeholder="Email" />
                     <InputBase type="password" name="password" v-model="password" placeholder="Hasło" />
                 </div>
-                <LoadingButton :isLoading="isApiLoading" text="Zaloguj się" @click="login()" class="mt-[21px]" />
-
-                <!-- <button class="reserve-button mt-4" @click="login">Zaloguj się</button> -->
-
-                <div class="flex justify-end mt-5 cursor-pointer" @click="isLogin = false">
+                <LoadingButton :isLoading="isApiLoading" text="Zaloguj się" @click="login()" class="md:mt-[21px] mt-[15px]" />
+                <!-- <div class="flex justify-end mt-5 cursor-pointer" @click="isLogin = false">
                     <p class="underline text-sm hover:text-[#959595]">
                         Nie pamiętam hasła
                     </p>
-                </div>
+                </div> -->
             </div>
             <div v-else>
                 <p class="text-[36px] font-semibold mb-[16px]">Nowe hasło</p>
@@ -88,7 +85,7 @@ const login = async () => {
     height: 100vh;
     box-shadow: inset 0px 1000000px 4px rgba(0, 0, 0, 0.15);
 }
-
+@media (min-width: 768px) {
 .form-container {
     width: 450px;
     background: white;
@@ -98,4 +95,18 @@ const login = async () => {
     right: 14%;
     padding: 45px;
 }
+}
+@media (max-width: 768px) {
+  .form-container {
+    width: 90%;
+    background: white;
+    border-radius: 16px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 27px;
+  }
+}
+
 </style>

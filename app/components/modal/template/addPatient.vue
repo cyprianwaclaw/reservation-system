@@ -1,22 +1,24 @@
 <template>
     <div class="w-full">
-        <p class="text-[32px] font-semibold -mt-[8px] mb-[25px]">Dodaj pacjenta</p>
-
-        <div class="flex w-full gap-[50px]">
-            <div class="w-full relative select-none h-[450px]">
+        <p class="modal-title">Dodaj pacjenta</p>
+        <div class="flex w-full flex-col md:flex-row gap-[32px] md:gap-[50px] mobile-style">
+            <div class="w-full relative select-none md:h-[450px]">
                 <div class="w-full flex flex-col gap-[10px]">
-                    <p class="text-[16px] font-semibold primary-color -mb-[2px]">Dane personalne</p>
-                    <div class="flex gap-[10px]">
+                    <p class="md:text-[16px] text-[14px] md:mb-[1px] -mb-[2px] font-semibold primary-color">Dane personalne
+                    </p>
+                    <div class="flex gap-[10px] flex-col md:flex-row">
                         <InputBase v-model="firstName" name="name" placeholder="Imię" />
                         <InputBase v-model="surName" name="surname" placeholder="Nazwisko" />
                     </div>
-                    <div class="flex gap-[10px]">
+                    <div class="flex gap-[10px] ">
                         <InputBase v-model="age" name="wiek" placeholder="Wiek" />
                         <InputBase v-model="pesel" name="pesel" placeholder="PESEL" />
                     </div>
-                    <p class="text-[16px] font-semibold primary-color -mb-[2px] mt-[24px] ">Rodzaj pacjenta</p>
+                    <p class="md:text-[16px] text-[14px] md:mb-[1px] -mb-[2px] font-semibold primary-color mt-[24px] ">
+                        Rodzaj pacjenta</p>
                     <InputSelect v-model="patientType" :options="patientTypeOptions" placeholder="Wybierz rodzaj" />
-                    <p class="text-[16px] font-semibold primary-color -mb-[2px] mt-[24px]">Zmieszkanie</p>
+                    <p class="md:text-[16px] text-[14px] md:mb-[1px] font-semibold primary-color -mb-[2px] mt-[24px]">
+                        Zmieszkanie</p>
                     <div class="flex gap-[10px]">
                         <div class="w-[140px]">
                             <InputBase v-model="city_code" name="city_code" placeholder="Kod" />
@@ -27,14 +29,15 @@
                 </div>
             </div>
             <div class="w-full flex flex-col gap-[10px]">
-                <p class="text-[16px] font-semibold primary-color -mb-[2px]">Dane kontaktowe</p>
+                <p class="md:text-[16px] text-[14px] md:mb-[1px]  font-semibold primary-color -mb-[2px]">Dane kontaktowe</p>
                 <InputBase v-model="email" name="email" placeholder="E-mail" />
                 <InputBase v-model="phone" name="phone" placeholder="Numer telefonu" />
-                <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Napisz coś o pacjencie</p>
+                <p class="md:text-[16px] text-[14px] md:mb-[1px] font-semibold primary-color mt-[24px] -mb-[2px]">Napisz coś
+                    o pacjencie</p>
                 <textarea v-model="description" placeholder="O pacjencie..."
                     class="add-description min-h-[170px]"></textarea>
-                <div class="absolute bottom-[30px] right-[40px]">
-                    <div class="flex place-items-center gap-[21px]">
+                <div class="md:absolute bottom-[30px] right-[40px] flex gap-[15px] md:mt-0 mt-[21px] mb-[74px] md:mb-[0px]">
+                    <div class="flex flex-row-reverse md:flex-row place-items-center gap-[21px]">
                         <Transition name="fade-slide">
                             <div v-if="isSuccess" class="flex place-items-center gap-[5px]">
                                 <Icon name="ph:check-circle" size="28" class="text-[#37B342]" />
@@ -150,5 +153,4 @@ const addPatient = async () => {
 .fade-slide-leave-from {
     opacity: 1;
     transform: translateY(0);
-}
-</style>
+}</style>

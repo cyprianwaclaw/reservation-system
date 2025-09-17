@@ -1,8 +1,8 @@
 import axios from 'axios'
 
 export default defineNuxtPlugin(() => {
-    // const API_URL = 'http://localhost/api'
-    const API_URL = 'https://api.fizjoterapia-kaczmarek.pl/api'
+    const API_URL = 'http://localhost/api'
+    // const API_URL = 'https://api.fizjoterapia-kaczmarek.pl/api'
 
     const axiosInstance = axios.create({
         baseURL: API_URL,

@@ -2,8 +2,8 @@
   <div v-if="isLoading">
     <LoadingSpinner :isLoading="true" />
   </div>
-  <div   class="flex w-ful px-[100px] mx-auto" @click="resetErrors()">
-    <div class="flex w-full mt-[70px] mb-[60px]">
+  <div   class="flex w-ful md:px-[100px] mx-auto px-[24px]" @click="resetErrors()">
+    <div class="flex w-full md:mt-[70px] md:mb-[60px] mt-[36px] mb-[32px]">
       <VisitsNewReserve @isLoading="loadingValue" />
     </div>
     <div class="main-photo flex items-center justify-center">

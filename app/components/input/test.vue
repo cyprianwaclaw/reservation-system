@@ -192,7 +192,33 @@ const selectedLabel = computed(() => selected.value ? selected.value.format(form
     position: relative;
     display: inline-block;
 }
-
+@media (max-width: 768px) {
+    .day-cell {
+    width: 40px;
+    height: 40px;
+    border-radius: 999px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+}
+.calendar-popover {
+    left: 0px;
+    margin-top: 8px;
+    width: 80%;
+    background: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #e6e9ef;
+    margin-bottom: 24px;
+    /* box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12); */
+    padding: 15px;
+    z-index: 9999;
+}
+}
+@media (min-width: 768px) {
 .calendar-popover {
     position: absolute;
     left: 0px;
@@ -205,7 +231,7 @@ const selectedLabel = computed(() => selected.value ? selected.value.format(form
     padding: 15px;
     z-index: 9999;
 }
-
+}
 .calendar-header {
     display: flex;
     align-items: center;

@@ -9,7 +9,7 @@
                 :class="{ 'rotate-180': isOpen }" />
         </div>
         <!-- max-h-48  -->
-        <div v-show="isOpen" :class="props.type==='hour' ? ' max-h-[150px]' : ' max-h-48'"
+        <div v-show="isOpen" :class="props.type==='hour' ? ' md:max-h-[150px] max-h-[112px]' : ' max-h-48'"
             class="options absolute w-full overflow-y-auto border rounded mt-1 bg-white z-50 shadow-lg">
             <div v-for="option in options" :key="option.value" class="option p-2 hover:bg-blue-100 cursor-pointer"
                 @click="selectOption(option)">
@@ -77,12 +77,26 @@ onBeforeUnmount(() => {
 .rotate-180 {
     transform: rotate(1deg);
 }
-
-.placeholder {
+/* .placeholder {
     color: #cacaca;
     font-size: 16px;
+} */
+@media (max-width: 768px) {
+.select-box {
+    background-color: white;
+    user-select: none;
+    border-radius: 12px;
+    border: 2px solid #dedede;
+    padding: 10px 10px 10px 12px;
+    transition: 0.25s all;
+    outline: none;
 }
-
+ .placeholder {
+    color: #9e9e9e;
+    font-size: 16px;
+} 
+}
+@media (min-width: 768px) {
 .select-box {
     background-color: white;
     user-select: none;
@@ -92,6 +106,13 @@ onBeforeUnmount(() => {
     transition: 0.25s all;
     outline: none;
 }
+ .placeholder {
+    color: #cacaca;
+    font-size: 16px;
+} 
+
+}
+
 .border-open{
     border: 2px solid  #31a9ce;
 }

@@ -34,14 +34,18 @@
         </Transition>
         <Transition name="fade-slide">
             <div v-if="isNonConfirmed">
-                <h2 class="text-[40px] font-bold mb-[4px]">Umów wizytę</h2>
-                <p class="text-[18px] text-gray-600 mb-[24px]">
+                <h2 class="md:text-[40px] text-[28px] font-bold mb-[4px]">Umów wizytę</h2>
+                <p class="text-[18px]  hidden md:flex text-gray-600 mb-[24px]">
                     Wybierz dogodny dla siebie termin z kalendarza poniżej <br>i zarezerwuj wizytę online.
                     To szybkie i wygodne, wystarczy kilka kliknięć
                 </p>
+                <p class="flex md:hidden text-[16px]  text-gray-600 mb-[24px]">
+                        Wybierz dogodny dla siebie termin z kalendarza poniżej i zarezerwuj wizytę online.
+                        To szybkie i wygodne, wystarczy kilka kliknięć
+                    </p>
                 <!-- {{  }} -->
                 <!-- Kalendarz -->
-                <div class="w-[370px] border-calendar mt-[44px] p-[25px]">
+                <div class="md:w-[370px] w-[340px] border-calendar md:mt-[44px] mt-[32px] p-[25px]">
                     <!-- <div class="mb-2 text-sm text-gray-500">Dostępnych dni: {{ availableDays.length }}</div> -->
                     <div class="calendar-header">
                         <Icon v-if="canGoPrev" @click="prevMonth" name="ph:caret-left-bold" size="27"
@@ -72,11 +76,11 @@
                         </button>
                     </div>
                 </div>
-                <div v-if="selectedDate || selectedPerson || selectedTime" class="pb-[160px]">
+                <div v-if="selectedDate || selectedPerson || selectedTime" class="md:pb-[160px] pb-[28px]">
                     <!-- Wybór lekarza -->
-                    <div v-if="selectedDate" class="person-picker mt-[50px]">
+                    <div v-if="selectedDate" class="person-picker md:mt-[50px]">
                         <h3>Wybierz lekarza</h3>
-                        <div class="persons-grid">
+                        <div class="persons-grid -mt-[3px] md:mt-[0px]">
                             <div v-for="person in persons" :key="person.doctor_id"
                                 :class="['person', { selected: selectedPerson === person.doctor_id }]"
                                 @click="selectPerson(person.doctor_id)">
@@ -107,18 +111,18 @@
                     <!-- Formularz rezerwacji -->
                     <div v-if="selectedDate && selectedPerson && selectedTime" class="booking-form">
                         <h3>Twoje dane</h3>
-                        <div class="flex place-items-center gap-[3px] text-[#4658e3] -mt-[6px] mb-[18px]">
+                        <div class="md:flex hidden  place-items-center gap-[3px] text-[#4658e3] -mt-[6px] mb-[18px]">
                             <Icon name="ph:warning-circle" size="23" />
                             <p class="text-[14px] ">Wymagamy tylko imienia, nazwiska oraz numeru telefonu</p>
                         </div>
 
                         <form @submit.prevent="book">
                             <div class="w-full flex flex-col gap-[10px]">
-                                <div class="w-full flex flex-row gap-[10px]">
+                                <div class="w-full flex md:flex-row flex-col gap-[10px]">
                                     <InputBase v-model="form.name" name="name" placeholder="Imię" />
                                     <InputBase v-model="form.surname" name="surname" placeholder="Nazwisko" />
                                 </div>
-                                <div class="w-full flex flex-row gap-[10px]">
+                                <div class="w-full flex md:flex-row flex-col gap-[10px]">
                                     <!-- <InputBase v-model="form.email" name="email" placeholder="E-mail" /> -->
                                     <div class="w-full flex flex-row gap-[14px] place-items-center">
                                         <p>Ile masz lat?</p>
@@ -128,17 +132,17 @@
                                     </div>
                                     <InputBase v-model="form.phone" name="phone" placeholder="Telefon" />
                                 </div>
-                                <InputBase v-model="form.email" name="email" placeholder="E-mail" class="my-[12px]" />
+                                <InputBase v-model="form.email" name="email" placeholder="E-mail" class=",d:my-[12px]" />
                                 <textarea v-model="form.description" placeholder="Opisz swoje dolegliwości..."
                                     class="add-description min-h-[170px]"></textarea>
                             </div>
-                            <div class="mt-[15px]">
+                            <div class="md:mt-[15px] mt-[4px]">
                                 <label class="checkbox-wrapper">
                                     <input type="checkbox" v-model="isChecked" class="checkbox-hidden" />
                                     <span class="checkbox-custom"></span>
                                     <p class="text-[#8a8a8a] mt-[2px]">akceptuje regulamin i politykę prywatności</p>
                                 </label>
-                                <LoadingButton type="submit" class=" mt-[32px]" :isLoading="isApiLoading"
+                                <LoadingButton type="submit" class="md:mt-[32px] mt-[21px]" :isLoading="isApiLoading"
                                     text="Zarezerwuj wizytę" />
 
                                 <!-- <button type="submit" class="reserve-button mt-[16px]">Zarezerwuj wizytę</button> -->
@@ -579,12 +583,23 @@ watch(confirmed, async (val) => {
 .person:hover {
     background: #29afd81d;
 }
+@media (max-width: 768px) {
+
+h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 36px;
+    margin-bottom: 12px;
+}
+}
+@media (min-width: 768px) {
 
 h3 {
     font-size: 17px;
     font-weight: 600;
     margin-top: 45px;
     margin-bottom: 13px;
+}
 }
 
 .border-calendar {

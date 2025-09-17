@@ -1,9 +1,9 @@
 <template>
     <div class="w-full">
-        <p class="text-[32px] font-semibold -mt-[8px] mb-[25px]">Dodaj wolne</p>
-        <div class="flex w-full gap-[50px]">
-            <div class="w-full relative select-none h-[450px]">
-                <p class="text-[16px] font-semibold primary-color mb-[8px]">Lekarz</p>
+        <p class="modal-title">Dodaj wolne</p>
+        <div class="flex w-full md:flex-row flex-col md:gap-[50px] gap-[28px] mobile-style">
+            <div class="w-full relative select-none md:h-[450px]">
+                <p class="md:text-[16px] text-[14px] font-semibold primary-color mb-[8px]">Lekarz</p>
                 <InputSelect v-model="selectDoctor" :options="doctorList" placeholder="Wybierz lekarza" />
                 <label :class="selectDoctor ? 'checkbox-wrapper' : 'checkbox-wrapper-none'">
                     <input type="checkbox" v-model="allDay" class="checkbox-hidden"
@@ -15,25 +15,25 @@
             <div class="w-full flex flex-col gap-[10px] relative">
                 <Transition name="fade-slide">
                     <div v-if="isNonAllDay" class="w-full flex flex-col gap-[10px] relative">
-                        <p class="text-[16px] font-semibold primary-color  -mt-[2px]">Data oraz godziny wolnego</p>
+                        <p class="md:text-[16px] text-[14px] font-semibold primary-color  -mt-[2px]">Data oraz godziny wolnego</p>
                         <InputSelect v-model="newDate" :options="dateOptions" placeholder="Wybierz datę"
                             :disabled="selectDoctor ? false : true" />
-                        <InputSelect v-model="timeStart" :options="timeOptions" placeholder="Wybierz godzinę rozpoczęcia"
+                        <InputSelect type="hour"  v-model="timeStart" :options="timeOptions" placeholder="Wybierz godzinę rozpoczęcia"
                             :disabled="newDate ? false : true" />
                         <Transition name="fade-slide">
-                            <InputSelect v-if="endTimeOptions" v-model="timeEnd" :options="endTimeOptions"
+                            <InputSelect type="hour" v-if="endTimeOptions" v-model="timeEnd" :options="endTimeOptions"
                                 placeholder="Wybierz godzinę zakończenia" />
                         </Transition>
                     </div>
                 </Transition>
                 <Transition name="fade-slide">
                     <div v-if="isAllDay">
-                        <p class="text-[16px] font-semibold primary-color  mb-[8px]">Data wolnego</p>
+                        <p class="md:text-[16px] text-[14px] font-semibold primary-color  mb-[8px]">Data wolnego</p>
 
                         <InputSelect v-model="dateEnd" :options="dateEndOptions" placeholder="Dzień urolopu" />
                     </div>
                 </Transition>
-                <div class="absolute bottom-[0px] right-[0px]">
+                <div class="md:absolute bottom-[0px] right-[0px] md:mt-0 mt-[21px] mb-[74px] md:mb-[0px]">
                     <div class="flex gap-[15px]">
                         <Transition name="fade-slide-confirm">
                             <div v-if="isSuccess" class="flex place-items-center gap-[5px]">
