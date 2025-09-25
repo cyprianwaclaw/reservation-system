@@ -2,13 +2,13 @@
     <div class="w-full">
         <p class="modal-title">Pacjenci</p>
         <div class="flex w-full flex-col md:flex-row gap-[54px] mobile-style">
-            <div class="w-full relative select-none">
+            <div class="w-full relative select-none" :class="singleUser ? 'md:flex md:flex-col  hidden' : 'flex flex-col'">
                 <div class="flex relative">
                     <Icon name="ph:magnifying-glass" size="28" class="text-[#cacaca] absolute top-[10px] left-[13px]" />
                     <input v-model="searchTerm" @input="onSearch" type="text" placeholder="Szukaj pacjenta..."
                         class="serach-input" />
                 </div>
-                <div class="flex flex-col overflow-y-auto w-full patients-container border-scroll-container h-[300px] relative"
+                <div class="flex flex-col overflow-y-auto w-full patients-container border-scroll-container  relative"
                     ref="containerRef">
                     <div v-for="(patients, letter) in allPatient" :key="letter">
                         <p class="letter-row">{{ letter }}</p>
@@ -33,14 +33,13 @@
             <!-- Szczegóły pojedynczego użytkownika -->
             <div class="w-full relative">
                 <!-- <Transition name="fade-slide" mode="out-in"> -->
-
-                <div v-if="isEdit" class="max-h-[450px] overflow-y-auto border-scroll-container pb-[28px]">
+                <div v-if="isEdit" class="max-h-[450px] overflow-y-auto border-scroll-container pb-[28px]  mobile-style">
                     <div class="flex gap-[7px] place-items-center cursor-pointer back-icon">
                         <Icon name="ph:arrow-left" size="21" class="cursor-pointer" />
                         <button class="cursor-pointer" @click="toggleEdit()">Powrót</Button>
                     </div>
                     <div class="w-full flex flex-col gap-[10px] mt-[40px]">
-                        <p class="text-[16px] font-semibold primary-color -mb-[2px]">Dane personalne</p>
+                        <p class="text-[14px] md:text-[16px] font-semibold primary-color -mb-[2px]">Dane personalne</p>
                         <InputBase v-model="firstName" name="name" placeholder="Imię" />
                         <InputBase v-model="surName" name="surname" placeholder="Nazwisko" />
                         <div class="flex w-full gap-[10px] place-items-center">
@@ -52,7 +51,7 @@
                             </div>
                             <InputBase v-model="pesel" name="pesel" placeholder="PESEL" />
                         </div>
-                        <p class="text-[16px] font-semibold primary-color -mb-[2px] mt-[24px]">Zmieszkanie</p>
+                        <p class="text-[14px] md:text-[16px] font-semibold primary-color -mb-[2px] mt-[24px]">Zmieszkanie</p>
                         <div class="flex gap-[10px]">
                             <div class="w-[140px]">
                                 <InputBase v-model="city_code" name="city_code" placeholder="Kod" />
@@ -60,14 +59,14 @@
                             <InputBase v-model="city" name="city" placeholder="Miejscowość" />
                         </div>
                         <InputBase v-model="street" name="street" placeholder="Nazwa ulicy oraz numer" />
-                        <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Dane kontaktowe</p>
+                        <p class="text-[14px] md:text-[16px]  font-semibold primary-color mt-[24px] -mb-[2px]">Dane kontaktowe</p>
                         <InputBase v-model="email" name="email" placeholder="E-mail" />
                         <InputBase v-model="phone" name="phone" placeholder="Telefon" />
                     </div>
                     <div class="w-full flex flex-col gap-[10px] mt-[24px]">
-                        <p class="text-[16px] font-semibold primary-color -mb-[2px]">Rodzaj pacjenta</p>
+                        <p class="text-[14px] md:text-[16px]  font-semibold primary-color -mb-[2px]">Rodzaj pacjenta</p>
                         <InputSelect v-model="patientType" :options="patientTypeOptions" placeholder="Wybierz rodzaj" />
-                        <p class="text-[16px] font-semibold primary-color mt-[24px] -mb-[2px]">Napisz coś o pacjencie</p>
+                        <p class="text-[14px] md:text-[16px]  font-semibold primary-color mt-[24px] -mb-[2px]">Napisz coś o pacjencie</p>
                         <textarea v-model="description" placeholder="O pacjencie..."
                             class="add-description min-h-[170px]"></textarea>
                     </div>
@@ -76,7 +75,7 @@
                         <Transition name="fade-slide">
                             <div v-if="isSuccess" class="flex place-items-center gap-[5px]">
                                 <Icon name="ph:check-circle" size="28" class="text-[#37B342]" />
-                                <p class="text-[18px] font-medium text-[#37B342]">Zapisano zmiany</p>
+                                <p class="text-[17px] font-medium text-[#37B342]">Zapisano zmiany</p>
                             </div>
                         </Transition>
                     </div>
@@ -86,12 +85,19 @@
                 <div v-if="!isEdit">
                     <!-- </div> -->
                     <Transition name="fade" mode="out-in">
+
                         <div v-if="singleUser" :key="singleUser.id"
-                            class="max-h-[450px] overflow-y-auto border-scroll-container pb-[28px]">
+                            class="md:max-h-[450px] overflow-y-auto border-scroll-container pb-[28px]  mobile-style">
+
+                            <div class="md:hidden flex gap-[7px] place-items-center cursor-pointer back-icon -mt-[4px] mb-[21px]">
+                                <Icon name="ph:arrow-left" size="21" class="cursor-pointer" />
+                                <button class="cursor-pointer" @click="singleUser = null">Powrót</Button>
+                            </div>
+
                             <p class="primary-color font-semibold text-[13px]">{{ singleUser.patient_type ?
                                 singleUser.patient_type : 'Zapisany przez panel' }}</p>
                             <div class="flex place-items-center gap-[14px]">
-                                <p class="text-[26px] font-bold">{{ singleUser.name }} {{ singleUser.surname }}</p>
+                                <p class="md:text-[26px] text-[24px] font-bold md:mt-[0px] mt-[4px]">{{ singleUser.name }} {{ singleUser.surname }}</p>
                             </div>
                             <div class="mt-[15px] gap-[5px] flex flex-col">
                                 <p class="text-gray-500 text-[16px]">{{ singleUser.email }}</p>
@@ -105,7 +111,7 @@
                                     singleUser.pesel }}</p>
                             </div>
                             <div class="mt-[34px]" v-if="singleUser?.city || singleUser?.street || singleUser?.city_code">
-                                <p class="text-[18px] font-semibold mb-[8px] primary-color ">Zamieszkanie</p>
+                                <p class="md:text-[18px] text-[14px] font-semibold mb-[8px] primary-color ">Zamieszkanie</p>
                                 <div class="pr-[18px]">
                                     <p class="text-[17px]">
                                         {{ singleUser.city_code }}, {{ singleUser.city }}
@@ -115,7 +121,7 @@
                                 </div>
                             </div>
                             <div class="mt-[34px]" v-if="singleUser?.description">
-                                <p class="text-[18px] font-semibold mb-[8px] primary-color ">O pacjencie</p>
+                                <p class="md:text-[18px] text-[14px] font-semibold mb-[8px] primary-color ">O pacjencie</p>
                                 <div class="pr-[18px] border-scroll-container">
                                     <p class="text-[16px]">
                                         {{ singleUser.description }}
@@ -123,7 +129,7 @@
                                 </div>
                             </div>
                             <div class="w-full mt-[34px]" v-if="singleUser?.visits?.length > 0">
-                                <p class="text-[18px] font-semibold mb-[13px] primary-color">Poprzednie wizyty</p>
+                                <p class="md:text-[18px] text-[14px] font-semibold mb-[13px] primary-color">Poprzednie wizyty</p>
                                 <div class="max-h-[300px] overflow-y-auto border-scroll-container">
                                     <div v-for="(single, index) in  singleUser?.visits" :key="index"
                                         class="w-full py-[18px] px-[18px] rounded-xl bg-[#f0f0f097]"
@@ -473,7 +479,7 @@ onMounted(() => {
 @media (min-width: 768px) {
     .letter-row {
         z-index: 10;
-        top: 0; 
+        top: 0;
         width: 100%;
         background: #31a9ce;
         border-radius: 8px;
@@ -508,6 +514,12 @@ onMounted(() => {
         font-family: 'Public Sans', sans-serif;
         font-size: 16px;
     }
+    .patient-row .non-active-user:hover {
+    cursor: pointer;
+    padding: 11px 14px;
+    border-radius: 10px;
+    background-color: #e0f2fe;
+}
 }
 
 .patient-row {
@@ -539,12 +551,6 @@ onMounted(() => {
     font-size: 17px;
 }
 
-.patient-row .non-active-user:hover {
-    cursor: pointer;
-    padding: 11px 14px;
-    border-radius: 10px;
-    background-color: #e0f2fe;
-}
 
 .pulse-loader {
     display: flex;
@@ -628,4 +634,5 @@ onMounted(() => {
 .fade-slide-leave-from {
     opacity: 1;
     transform: translateY(0);
-}</style>
+}
+</style>

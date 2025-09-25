@@ -38,20 +38,22 @@
                     :disabled="!selectedDate" />
                 <InputSelect type='hour' v-model="newTime" :options="timeOptions" placeholder="Wybierz godzinę"
                     :disabled="!newDoctor" />
-                <div class="md:absolute bottom-[30px] right-[40px] flex gap-[15px] md:mt-0 mt-[21px] mb-[74px] md:mb-[0px]">
-
-                    <Transition name="fade-slide-confirm">
-                        <div v-if="errors?.email" class="flex place-items-center gap-[5px]">
-                            <Icon name="ph:warning" size="25" class="text-[#f43737]" />
-                            <p class="text-[17px] font-medium text-[#f43737]">Błąd dodania wizyty</p>
-                        </div>
-                    </Transition>
-                    <Transition name="fade-slide-confirm">
-                        <div v-if="isSuccess" class="flex place-items-center gap-[5px]">
-                            <Icon name="ph:check-circle" size="26" class="text-[#37B342]" />
-                            <p class="text-[17px] font-medium text-[#37B342]">Dodano wizytę</p>
-                        </div>
-                    </Transition>
+                <div class="md:absolute bottom-[30px] md:right-[40px] flex md:flex-row flex-row-reverse gap-[15px] md:mt-0 mt-[21px] mb-[74px] md:mb-[0px] justify-end">
+                    <!-- <div class="dkex"> -->
+                        <Transition name="fade-slide-confirm">
+                            <div v-if="errors?.email" class="flex place-items-center gap-[5px]">
+                                <Icon name="ph:warning" size="25" class="text-[#f43737]" />
+                                <p class="text-[17px] font-medium text-[#f43737]">Błąd dodania wizyty</p>
+                            </div>
+                        </Transition>
+                        <!-- isSuccess -->
+                        <Transition name="fade-slide-confirm">
+                            <div v-if="isSuccess" class="flex place-items-center gap-[5px]">
+                                <Icon name="ph:check-circle" size="26" class="text-[#37B342]" />
+                                <p class="text-[17px] font-medium text-[#37B342]">Dodano wizytę</p>
+                            </div>
+                        </Transition>
+                    <!-- </div> -->
                     <LoadingButton :isLoading="isApiLoading" text="Dodaj wizytę" @click="addVisit()" />
                 </div>
             </div>

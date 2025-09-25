@@ -1,24 +1,25 @@
 <template>
-    <div class="flex w-full gap-[50px] h-full cursor-default" v-if="visitData?.user">
+    <div class="flex w-full md:h-full flex-col md:flex-row gap-[54px] mobile-style cursor-default" v-if="visitData?.user">
         <div class="w-full relative">
-            <p class="primary-color font-semibold text-[13px]">{{ visitData.user.type ? visitData.user.type : 'Zapisany przez panel' }}</p>
+            <!-- <p class="primary-color font-semibold text-[13px]">{{ visitData.user.type ? visitData.user.type : 'Zapisany przez panel' }}</p> -->
             <div class="flex place-items-center gap-[14px]">
                 <p class="text-[26px] font-bold">{{ visitData.user.name }} {{ visitData.user.surname }}</p>
             </div>
-            <div class="mt-[6px] gap-[4px] flex flex-col">
+            <div class="mt-[12px] md:mt-[6px] gap-[4px] flex flex-col">
                 <div class="flex place-items-center">
                     <p class="text-[#bababa] text-[15px]">{{ visitData.user.email }}</p>
                     <span v-if="visitData.user.email" class="dot mx-[8px]" />
                     <p class="text-[#bababa] text-[15px]">
-                        +48 {{ visitData.user.phone ? visitData.user.phone.replace(/\D/g, '').match(/.{1,3}/g)?.join(' ') :
-                            '' }}
+                        +48
+                        <!-- {{ visitData.user.phone ? visitData.user.phone.replace(/\D/g, '').match(/.{1,3}/g)?.join(' ') :
+                            '' }} -->
                     </p>
                 </div>
                 <p class="text-[#bababa] text-[15px] -mt-[3px]">{{ visitData.user.age }}</p>
             </div>
-            <p class="text-[15px] font-semibold  primary-color  mt-[24px]">Usługa: <span
+            <p class="text-[16px] md:text-[15px] font-semibold  primary-color  mt-[24px]">Usługa: <span
                     class="font-medium text-black-own">{{ visitData.current_visit.type }}</span></p>
-            <div class="w-[270px] bg-[#31a9ce29] rounded-xl p-4 mt-[10px]">
+            <div class="md:w-[270px] w-full bg-[#31a9ce29] rounded-xl p-4 md:mt-[10px] mt-[12px]">
                 <div class="flex place-items-center gap-[8px]">
                     <Icon name="ph:clock" size="54" class="primary-color" />
                     <div class="flex flex-col">
@@ -31,67 +32,38 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-[38px]">
-                <p class="text-[16px] font-semibold mb-[8px] primary-color ">O pacjencie</p>
+
+            <div class="md:mt-[38px] mt-[30px]">
+                <p class="md:text-[16px] text-[14px] font-semibold mb-[8px] primary-color ">O pacjencie</p>
                 <div class="max-h-[111px] overflow-y-auto pr-[10px]">
                     <p class="text-[16px]">
                         {{ visitData.user.description }}
                     </p>
                     <div v-if="!visitData.user.description" class="mt-[6px]">
-                        <p class="text-[#8b8b8b6a] font-bold text-[22px]">Brak opisu</p>
+                        <p class="text-[#8b8b8b6a] font-bold md:text-[22px] text-[20px]">Brak opisu</p>
                     </div>
                 </div>
             </div>
             <!-- Blok potwierdzenia odwołania wizyty -->
-            <div class="w-full flex items-start gap-[20px] absolute bottom-0" v-if="isDelete">
+            <!-- <div class="w-full flex items-start gap-[20px] absolute bottom-0" v-if="isDelete">
                 <p class="font-semibold mt-[9px]">Czy na pewno odwołać?</p>
                 <div class="flex gap-[6px]">
                     <button class="remove-button" @click="confirmDelete()">Tak</button>
                     <button class="primary-button" @click="isDelete = false">Nie</button>
                 </div>
-            </div>
+            </div> -->
 
             <!-- Blok potwierdzenia zmiany daty -->
-            <div v-if="isChangeDate" class="change-date-container">
-                <div class="w-full flex justify-between mb-[15px]">
-                    <p class="flex font-semibold text-[21px] -mt-[6px]">Zmień termin wizyty</p>
-                    <Icon name="carbon:close" size="38" class="close-icon -mt-[12px] -mr-[10px]"
-                        @click="isChangeDate = false" />
-                </div>
-                <!-- Data -->
-                 <div class="flex flex-col gap-[10px]">
-                <InputTest v-model="selectedDate" :available-days="schedule" @select-day="handleSelectDay" />
-
-                     <!-- <InputSelect v-model="newDate" :options="dateOptions" placeholder="Wybierz datę" /> -->
-                     <InputSelect v-model="newDoctor" :options="doctorOptions" placeholder="Wybierz lekarza"
-                     :disabled="newDate ? false : true" />
-                     <InputSelect type='hour' v-model="newTime" :options="timeOptions" placeholder="Wybierz godzinę"
-                     :disabled="newDoctor ? false : true" />
-                    </div>
-                <!-- Przyciski -->
-                <div class="absolute bottom-[40px]">
-                                        <div class="flex gap-[15px]">
-                                            <LoadingButton :isLoading="isApiLoading" text="Gotowe" @click="confirmChangeDate()" />
-                                            <Transition name="fade-slide-confirm">
-                                                <div v-if="isSuccess" class="flex place-items-center gap-[5px]">
-                                                    <Icon name="ph:check-circle" size="28" class="text-[#37B342]" />
-                                                    <p class="text-[18px] font-medium text-[#37B342]">Zapisano</p>
-                                                </div>
-                                            </Transition>
-                        </div>
-                    <!-- <Button class="remove-button" @click="confirmChangeDate()">Potwierdź</Button> -->
-                    <!-- <button class="primary-button" @click="confirmChangeDate()">Zapisz</button> -->
-                </div>
-            </div>
             <!-- Blok standardowych przycisków -->
-            <div class="w-full flex justify-start gap-[6px] absolute bottom-0" v-if="!isDelete && !isChangeDate">
+            <div class="w-full justify-start gap-[6px] md:absolute md:bottom-0 md:flex hidden"
+                v-if="!isDelete && !isChangeDate">
                 <button class="primary-button" @click="openChangeDate()">Zmień termin</button>
                 <button class="remove-button" @click="isDelete = true">Odwołaj wizytę</button>
             </div>
         </div>
         <div class="w-full relative">
-            <div class="w-full mt-[14px]">
-                <p class="text-[16px] font-semibold mb-[13px] primary-color ">Poprzednie wizyty</p>
+            <div class="w-full md:mt-[14px] ">
+                <p class="md:text-[16px] text-[14px] font-semibold mb-[13px] primary-color ">Poprzednie wizyty</p>
                 <div class="max-h-[180px] overflow-y-auto rounded-xl" v-if="visitData?.notes?.length > 0">
                     <div v-for="(single, index) in visitData.notes" :key="index"
                         class="w-full py-[18px] px-[18px] rounded-xl bg-[#f0f0f097]"
@@ -101,22 +73,67 @@
                     </div>
                 </div>
                 <div v-else>
-                    <p class="text-[#8b8b8b6a] font-bold text-[22px] mb-[30px]">Brak wizyt</p>
+                    <p class="text-[#8b8b8b6a] font-bold text-[20px] md:text-[22px] mb-[30px]">Brak wizyt</p>
                 </div>
             </div>
-            <div class="relative mt-[14px]">
+            <div class="relative mt-[36px] md:mt-[14px]">
                 <textarea v-model="newNote" placeholder="Dodaj sprawozdanie..." class="add-description"></textarea>
                 <button class="primary-button-ghost absolute bottom-[23px] right-[17px]" @click="addNote()">Dodaj</button>
             </div>
-            <div class="absolute bottom-0 right-0 w-full">
-                <div class="relative mt-[14px]">
+            <div class="md:absolute md:bottom-0 right-0 w-full">
+                <div class="relative mt-[34px] md:mt-[14px]">
                     <textarea class="own-note" v-model="fastNote" placeholder="Notatka..."></textarea>
                     <button class="primary-button-ghost absolute bottom-[20px] right-[20px]"
                         @click="addFastNote()">Ok</button>
                 </div>
             </div>
+            <div class="w-full justify-start gap-[6px] flex md:hidden mt-[32px] mb-[21px]"
+                v-if="!isDelete && !isChangeDate">
+                <button class="primary-button" @click="openChangeDate()">Zmień termin</button>
+                <button class="remove-button" @click="isDelete = true">Odwołaj wizytę</button>
+            </div>
         </div>
 
+                <!-- Blok potwierdzenia odwołania wizyty -->
+                <div class="w-full flex items-start gap-[20px] md:absolute md:bottom-[30px] -mt-[24px] mb-[30px] md:mb-[0px]" v-if="isDelete">
+                    <p class="font-semibold mt-[9px]">Czy na pewno odwołać?</p>
+                    <div class="flex gap-[6px]">
+                        <button class="remove-button" @click="confirmDelete()">Tak</button>
+                        <button class="primary-button" @click="isDelete = false">Nie</button>
+                    </div>
+                </div>
+
+                <div v-if="isChangeDate" class="change-date-container">
+                    <div class="w-full flex justify-between mb-[15px]">
+                        <p class="flex font-semibold text-[21px] -mt-[6px]">Zmień termin wizyty</p>
+                        <Icon name="carbon:close" size="38" class="close-icon -mt-[12px] -mr-[10px]"
+                            @click="isChangeDate = false" />
+                    </div>
+                    <!-- Data -->
+                    <div class="flex flex-col gap-[10px]">
+                        <InputTest v-model="selectedDate" :available-days="schedule" @select-day="handleSelectDay" />
+
+                        <!-- <InputSelect v-model="newDate" :options="dateOptions" placeholder="Wybierz datę" /> -->
+                        <InputSelect v-model="newDoctor" :options="doctorOptions" placeholder="Wybierz lekarza"
+                            :disabled="newDate ? false : true" />
+                        <InputSelect type='hour' v-model="newTime" :options="timeOptions" placeholder="Wybierz godzinę"
+                            :disabled="newDoctor ? false : true" />
+                    </div>
+                    <!-- Przyciski -->
+                    <div class="md:absolute bottom-[40px] mt-[21px] md:mt-[0px]">
+                        <div class="flex gap-[15px]">
+                            <LoadingButton :isLoading="isApiLoading" text="Gotowe" @click="confirmChangeDate()" />
+                            <Transition name="fade-slide-confirm">
+                                <div v-if="isSuccess" class="flex place-items-center gap-[5px]">
+                                    <Icon name="ph:check-circle" size="28" class="text-[#37B342]" />
+                                    <p class="text-[18px] font-medium text-[#37B342]">Zapisano</p>
+                                </div>
+                            </Transition>
+                        </div>
+                        <!-- <Button class="remove-button" @click="confirmChangeDate()">Potwierdź</Button> -->
+                        <!-- <button class="primary-button" @click="confirmChangeDate()">Zapisz</button> -->
+                    </div>
+                </div>
     </div>
 </template>
 
@@ -127,16 +144,14 @@ const axiosInstance = useNuxtApp().$axiosInstance as any;
 const { schedule, fetchSchedule } = useSchedule(axiosInstance)
 
 
-// const {   errors, setErrors, } = useErrors()
-
 const isSuccess = ref()
 
 const props = defineProps({
     vistId: {
-        type: Array,
+        type: [Array, Number],
         required: false,
-    }
-})
+    },
+});
 
 const newDate = ref('')
 const newDoctor = ref(null as null | number)
@@ -154,7 +169,7 @@ const visitDuration = ref<number | null>(null)
 onMounted(async () => {
     const res = await axiosInstance.get(`/schedule/visits/${props.vistId}`)
     visitData.value = res.data
-    fastNote.value = visitData.value?.fast_note.text || ''
+    fastNote.value = visitData.value?.fast_note?.text || ''
     if (visitData.value?.current_visit?.start_time && visitData.value?.current_visit?.end_time) {
         const [startH, startM] = visitData.value.current_visit.start_time.split(':').map(Number)
         const [endH, endM] = visitData.value.current_visit.end_time.split(':').map(Number)
@@ -185,16 +200,16 @@ const addNote = async () => {
 const addFastNote = async () => {
     if (fastNote.value.length > 3) {
 
-            const newFastNoteRes = await axiosInstance.post(`/visits/${props.vistId}/notes`, {
-                'text': fastNote.value,
-                "is_edit": true,
-            })
-            const res = await axiosInstance.get(`/schedule/visits/${props.vistId}`)
-            visitData.value = res.data
+        const newFastNoteRes = await axiosInstance.post(`/visits/${props.vistId}/notes`, {
+            'text': fastNote.value,
+            "is_edit": true,
+        })
+        const res = await axiosInstance.get(`/schedule/visits/${props.vistId}`)
+        visitData.value = res.data
         setTimeout(() => {
             closeModal()
         }, 2100)
-}
+    }
 }
 
 const confirmDelete = async () => {
@@ -224,9 +239,9 @@ const availableTimes = computed(() => {
 const confirmChangeDate = async () => {
     if (!newDate.value || !newDoctor.value || !newTime.value) return;
 
-     isApiLoading.value = true
+    isApiLoading.value = true
     try {
-            const res = await axiosInstance.put(`/visits/${props.vistId}/update`, {
+        const res = await axiosInstance.put(`/visits/${props.vistId}/update`, {
             date: newDate.value,
             hour: newTime.value,
             doctor_id: newDoctor.value,
@@ -236,7 +251,7 @@ const confirmChangeDate = async () => {
         setTimeout(() => {
             isSuccess.value = res.data?.message == 'Wizyta zaktualizowana' ? true : false
         }, 280)
-        setTimeout(() => { 
+        setTimeout(() => {
             closeModal()
         }, 2100)
     } catch (err) {
@@ -284,12 +299,12 @@ const dateOptions = computed(() =>
         label: formatDateDDMMYYYY(item.date),
     }))
 );
-function findClosestTime(time, options) {
+function findClosestTime(time: any, options: any) {
     if (!time || options.length === 0) return options[0]?.value || ''
     const [h, m] = time.split(':').map(Number)
     let closest = options[0].value
     let minDiff = Math.abs(h * 60 + m - (() => { const [hh, mm] = closest.split(':').map(Number); return hh * 60 + mm })())
-    options.forEach(opt => {
+    options.forEach((opt: any) => {
         const [hh, mm] = opt.value.split(':').map(Number)
         const diff = Math.abs(h * 60 + m - (hh * 60 + mm))
         if (diff < minDiff) { minDiff = diff; closest = opt.value }
@@ -297,13 +312,13 @@ function findClosestTime(time, options) {
     return closest
 }
 
-function handleSelectDay(payload) {
+function handleSelectDay(payload: any) {
     selectedDate.value = payload.date
     newDate.value = payload.date
     if (payload.doctors.length === 1) {
         newDoctor.value = payload.doctors[0].doctor_id
         if (payload.doctors[0].free_slots?.length) {
-            const opts = payload.doctors[0].free_slots.map(t => ({ value: t }))
+            const opts = payload.doctors[0].free_slots.map((t: any) => ({ value: t }))
             newTime.value = findClosestTime('', opts)
         }
     } else {
@@ -337,6 +352,26 @@ function handleSelectDay(payload) {
     color: #31A9CE;
 }
 
+@media (max-width: 768px) {
+.change-date-container {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 38px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    border: 1px solid #e6e9ef;
+    /* box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12); */
+    /* position: absolute; */
+    /* bottom: -10px;
+    left: -10px;
+    width: 430px;
+    height: 540px */
+}
+}
+
+
+@media (min-width: 768px) {
 .change-date-container {
     display: flex;
     flex-direction: column;
@@ -347,11 +382,13 @@ function handleSelectDay(payload) {
     border: 1px solid #e6e9ef;
     box-shadow: 0 8px 24px rgba(16, 24, 40, 0.12);
     position: absolute;
-    bottom: -10px;
-    left: -10px;
+    bottom: 25px;
+    left: 25px;
     width: 430px;
     height: 540px
 }
+}
+
 
 /* tło do modala */
 .v-enter-active,

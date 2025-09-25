@@ -252,8 +252,8 @@ const weekDays = computed<any[]>(() => {
     const dOW = weekStart.value.day();
     const toMonday = (dOW + 6) % 7;
     const mondayThisWeek = weekStart.value.subtract(toMonday, 'day').startOf('day');
-    const allDays = Array.from({ length: 60 }).map((_, i) => {
-        const d = mondayThisWeek.add(i - 30, 'day') as any
+    const allDays = Array.from({ length: 21 }).map((_, i) => {
+        const d = mondayThisWeek.add(i - 10, 'day') as any
         return {
             date: d.format('YYYY-MM-DD'),
             label: d.format('dddd (DD.MM)').replace(/^./, (s: any) => s.toUpperCase()),
@@ -638,10 +638,15 @@ function handleSlotClick(event: MouseEvent, day: any, doctor: any, baseHour: str
 }
 
 
-const scrollAmount = 1000; // px do przesunięcia
+const scrollAmount = 800; // px do przesunięcia
 
 function scrollLeft() {
     if (!scheduleScrollEl.value) return;
+    // console.log(displayDate.value)
+    // setWeekStartFromCookieOrToday()
+    // console.log(centerDayCookie.value)
+    // updateCenterDay()
+    centerDayCookie.value = displayDate.value
     scheduleScrollEl.value.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
 }
 
